@@ -26,15 +26,26 @@ const STATUS_COLORS: Record<
   ReservationStatus,
   { bg: string; text: string; border: string }
 > = {
-  "Đã đặt": {
+  // New status values
+  "Chờ xác nhận": {
+    bg: "bg-yellow-100",
+    text: "text-yellow-700",
+    border: "border-yellow-300",
+  },
+  "Đã xác nhận": {
     bg: "bg-blue-100",
     text: "text-blue-700",
     border: "border-blue-300",
   },
-  "Đã nhận": {
+  "Đã nhận phòng": {
     bg: "bg-green-100",
     text: "text-green-700",
     border: "border-green-300",
+  },
+  "Đã trả phòng": {
+    bg: "bg-purple-100",
+    text: "text-purple-700",
+    border: "border-purple-300",
   },
   "Đã hủy": {
     bg: "bg-red-100",
@@ -45,6 +56,17 @@ const STATUS_COLORS: Record<
     bg: "bg-gray-100",
     text: "text-gray-700",
     border: "border-gray-300",
+  },
+  // Legacy values for backward compatibility
+  "Đã đặt": {
+    bg: "bg-blue-100",
+    text: "text-blue-700",
+    border: "border-blue-300",
+  },
+  "Đã nhận": {
+    bg: "bg-green-100",
+    text: "text-green-700",
+    border: "border-green-300",
   },
 };
 

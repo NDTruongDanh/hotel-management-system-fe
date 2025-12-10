@@ -146,7 +146,8 @@ export function useReservations() {
             )}`,
             roomID: "P999", // Would be selected by user
             roomName: "Phòng 999",
-            roomTypeName: data.roomTypeID,
+            roomTypeID: data.roomTypeID,
+            roomTypeName: "Phòng tiêu chuẩn", // Mock name since we only have ID
             checkInDate: data.checkInDate,
             checkOutDate: data.checkOutDate,
             status: "Đã đặt",

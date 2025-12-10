@@ -111,9 +111,11 @@ export function useServices() {
       serviceName: data.serviceName,
       categoryID: data.categoryID,
       category: category,
+      serviceGroup: data.serviceGroup,
       price: data.price,
       unit: data.unit,
       description: data.description,
+      isOpenPrice: data.isOpenPrice,
       isActive: true,
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -145,9 +147,11 @@ export function useServices() {
               serviceName: data.serviceName,
               categoryID: data.categoryID,
               category: category,
+              serviceGroup: data.serviceGroup,
               price: data.price,
               unit: data.unit,
               description: data.description,
+              isOpenPrice: data.isOpenPrice,
               updatedAt: new Date(),
             }
           : service

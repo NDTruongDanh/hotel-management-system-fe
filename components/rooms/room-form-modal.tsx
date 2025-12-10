@@ -46,7 +46,7 @@ export function RoomFormModal({
     roomID: "",
     roomName: "",
     roomTypeID: "",
-    roomStatus: "Trống",
+    roomStatus: "Sẵn sàng",
     floor: 1,
   });
 
@@ -68,7 +68,7 @@ export function RoomFormModal({
         roomID: "",
         roomName: "",
         roomTypeID: roomTypes[0]?.roomTypeID || "",
-        roomStatus: "Trống",
+        roomStatus: "Sẵn sàng",
         floor: 1,
       });
     }
@@ -260,10 +260,13 @@ export function RoomFormModal({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Trống">Trống</SelectItem>
+                  <SelectItem value="Sẵn sàng">Sẵn sàng</SelectItem>
                   <SelectItem value="Đang thuê">Đang thuê</SelectItem>
-                  <SelectItem value="Đang dọn dẹp">Đang dọn dẹp</SelectItem>
+                  <SelectItem value="Bẩn">Bẩn</SelectItem>
+                  <SelectItem value="Đang dọn">Đang dọn</SelectItem>
+                  <SelectItem value="Đang kiểm tra">Đang kiểm tra</SelectItem>
                   <SelectItem value="Bảo trì">Bảo trì</SelectItem>
+                  <SelectItem value="Đã đặt">Đã đặt</SelectItem>
                 </SelectContent>
               </Select>
             </div>

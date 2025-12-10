@@ -37,6 +37,7 @@ export function useCustomers() {
         nationality: data.nationality,
         customerType: data.customerType,
         isVip: data.isVip,
+        vipTier: data.isVip ? "VIP" : "STANDARD",
         notes: data.notes,
         status: "Hoạt động",
         createdAt: new Date().toISOString(),

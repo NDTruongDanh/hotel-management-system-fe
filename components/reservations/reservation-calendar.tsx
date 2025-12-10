@@ -2,7 +2,10 @@
 
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ReservationEvent } from "@/lib/types/reservation";
+import {
+  ReservationEvent,
+  ReservationHeaderStatus,
+} from "@/lib/types/reservation";
 import { cn } from "@/lib/utils";
 
 interface ReservationCalendarProps {
@@ -10,11 +13,17 @@ interface ReservationCalendarProps {
   onEventClick?: (event: ReservationEvent) => void;
 }
 
-const STATUS_COLORS = {
-  "Đã đặt": "bg-blue-100 text-blue-700 border-blue-300",
-  "Đã nhận": "bg-green-100 text-green-700 border-green-300",
+const STATUS_COLORS: Record<ReservationHeaderStatus, string> = {
+  // New status values
+  "Chờ xác nhận": "bg-yellow-100 text-yellow-700 border-yellow-300",
+  "Đã xác nhận": "bg-blue-100 text-blue-700 border-blue-300",
+  "Đã nhận phòng": "bg-green-100 text-green-700 border-green-300",
+  "Đã trả phòng": "bg-purple-100 text-purple-700 border-purple-300",
   "Đã hủy": "bg-red-100 text-red-700 border-red-300",
   "Không đến": "bg-gray-100 text-gray-700 border-gray-300",
+  // Legacy values for backward compatibility
+  "Đã đặt": "bg-blue-100 text-blue-700 border-blue-300",
+  "Đã nhận": "bg-green-100 text-green-700 border-green-300",
 };
 
 export function ReservationCalendar({
@@ -148,13 +157,23 @@ export function ReservationCalendar({
       {/* Legend */}
       <div className="p-5 pt-0 flex flex-wrap gap-4">
         <div className="flex items-center gap-2">
+          <Badge className="bg-yellow-100 text-yellow-700 border-yellow-300">
+            Chờ xác nhận
+          </Badge>
+        </div>
+        <div className="flex items-center gap-2">
           <Badge className="bg-blue-100 text-blue-700 border-blue-300">
-            Đã đặt
+            Đã xác nhận
           </Badge>
         </div>
         <div className="flex items-center gap-2">
           <Badge className="bg-green-100 text-green-700 border-green-300">
-            Đã nhận
+            Đã nhận phòng
+          </Badge>
+        </div>
+        <div className="flex items-center gap-2">
+          <Badge className="bg-purple-100 text-purple-700 border-purple-300">
+            Đã trả phòng
           </Badge>
         </div>
         <div className="flex items-center gap-2">
