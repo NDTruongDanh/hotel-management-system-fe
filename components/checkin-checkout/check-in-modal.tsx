@@ -301,9 +301,7 @@ export function CheckInModal({
                         updateRoomAssignment(detail.detailID, "roomID", value)
                       }
                     >
-                      <SelectTrigger className="h-10 border-gray-300 bg-white">
-                        <SelectValue placeholder="Chọn phòng..." />
-                      </SelectTrigger>
+                      <SelectTrigger className="h-10 border-gray-300 bg-white w-full"></SelectTrigger>
                       <SelectContent>
                         {availableRooms.length === 0 ? (
                           <SelectItem value="no-rooms" disabled>
@@ -312,18 +310,8 @@ export function CheckInModal({
                         ) : (
                           availableRooms.map((room) => (
                             <SelectItem key={room.roomID} value={room.roomID}>
-                              <div className="flex items-center gap-2">
-                                <span className="font-medium">
-                                  {room.roomName}
-                                </span>
-                                <span className="text-xs text-gray-500">
-                                  Tầng {room.floor}
-                                </span>
-                                <span className="text-xs text-success-600">
-                                  {room.roomStatus === "Sẵn sàng" ? "🟢" : "🔵"}{" "}
-                                  {room.roomStatus}
-                                </span>
-                              </div>
+                              {room.roomName} - Tầng {room.floor} (
+                              {room.roomStatus})
                             </SelectItem>
                           ))
                         )}
