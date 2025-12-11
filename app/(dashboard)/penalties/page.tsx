@@ -1,21 +1,25 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { usePenaltyPage } from "@/hooks/use-penalty-page";
 import { PageHeader } from "@/components/services/page-header";
 import { NotificationBanner } from "@/components/services/notification-banner";
 import { PenaltyTable } from "@/components/penalties/penalty-table";
+import { PenaltyFormModal } from "@/components/penalties/penalty-form-modal";
 import { Button } from "@/components/ui/button";
 import { ICONS } from "@/src/constants/icons.enum";
 
 export default function PenaltiesPage() {
   const {
     penalties,
-    statistics,
     notification,
+    modalOpen,
+    modalMode,
+    selectedPenalty,
     handleAddPenalty,
     handleEditPenalty,
+    handlePenaltySubmit,
     handleDeletePenalty,
+    handleCloseModal,
     handleDismissNotification,
   } = usePenaltyPage();
 
@@ -36,30 +40,15 @@ export default function PenaltiesPage() {
         />
       )}
 
-      {/* Statistics Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Phí phạt đang hoạt động
-            </CardTitle>
-            {ICONS.PENALTY}
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{statistics.activeCount}</div>
-            <p className="text-xs text-muted-foreground">
-              / {statistics.totalCount} tổng số
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-
       {/* Section Header with Add Button */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-semibold text-gray-900">
           Danh sách Phí Phạt
         </h2>
-        <Button onClick={handleAddPenalty}>
+        <Button
+          onClick={handleAddPenalty}
+          className="bg-primary-600 hover:bg-primary-700 text-white"
+        >
           {ICONS.PLUS}
           <span className="ml-2">Thêm Phí Phạt</span>
         </Button>
@@ -70,6 +59,15 @@ export default function PenaltiesPage() {
         penalties={penalties}
         onEdit={handleEditPenalty}
         onDelete={handleDeletePenalty}
+      />
+
+      {/* Penalty Form Modal */}
+      <PenaltyFormModal
+        open={modalOpen}
+        mode={modalMode}
+        penalty={selectedPenalty}
+        onClose={handleCloseModal}
+        onSubmit={handlePenaltySubmit}
       />
     </div>
   );
