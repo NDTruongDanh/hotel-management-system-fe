@@ -58,33 +58,16 @@ export function SurchargeFormModal({
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // Update form data when surcharge changes (edit mode)
+  // Update form data when modal opens - deferred to avoid sync setState in effect
   useEffect(() => {
-    if (open && mode === "edit" && surcharge) {
-      setFormData({
-        surchargeName: surcharge.surchargeName,
-        price: surcharge.price,
-        description: surcharge.description || "",
-        isOpenPrice: surcharge.isOpenPrice || false,
-      });
-    } else if (open && mode === "create") {
-      setFormData({
-        surchargeName: "",
-        price: 0,
-        description: "",
-        isOpenPrice: false,
-      });
-    }
-    // Clear errors when opening modal
-    setErrors({});
-  }, [open, mode, surcharge]);
+    if (!open) return;
 
-  // Update form data when modal opens or surcharge changes
-  useEffect(() => {
-    if (open) {
+    const timeoutId = setTimeout(() => {
       setFormData(getInitialFormData(mode, surcharge));
       setErrors({});
-    }
+    }, 0);
+
+    return () => clearTimeout(timeoutId);
   }, [open, mode, surcharge]);
 
   const validateForm = (): boolean => {
