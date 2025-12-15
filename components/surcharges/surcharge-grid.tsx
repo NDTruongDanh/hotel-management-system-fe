@@ -52,8 +52,6 @@ export function SurchargeGrid({
     setActiveFilter(null);
   };
 
-  const hasFilters = searchTerm || activeFilter !== null;
-
   const stats = {
     total: surcharges.length,
     active: surcharges.filter(s => s.isActive).length,
@@ -122,7 +120,7 @@ export function SurchargeGrid({
           <div className="flex items-center gap-2">
             <span className="text-sm text-gray-600 font-semibold">Lọc:</span>
             <button
-              onClick={() => setActiveFilter(null)}
+              onClick={clearFilters}
               className={`min-w-max px-5 py-2.5 rounded-full text-sm font-semibold transition-all ${
                 activeFilter === null
                   ? "bg-gray-800 text-white shadow-md"
@@ -165,17 +163,7 @@ export function SurchargeGrid({
               <span>Giá linh hoạt</span>
             </button>
           </div>
-          {hasFilters && (
-            <button
-              onClick={clearFilters}
-              className="group min-w-max h-9 px-4 rounded-full text-sm font-semibold bg-white border border-error-200 text-error-700 inline-flex items-center justify-center gap-2 shadow-sm hover:bg-gradient-to-r hover:from-error-600 hover:to-error-500 hover:text-white active:scale-95 focus:outline-none focus:ring-2 focus:ring-error-300 transition"
-              aria-label="Xóa lọc"
-              title="Xóa tất cả bộ lọc"
-            >
-              <span className="w-4 h-4 flex items-center justify-center text-error-700 group-hover:text-white">{ICONS.X}</span>
-              <span className="leading-none group-hover:text-white">Xóa lọc</span>
-            </button>
-          )}
+          {/* Removed duplicate "Xóa lọc" button — "Tất cả" clears filters now */}
         </div>
       </div>
 
@@ -199,15 +187,7 @@ export function SurchargeGrid({
           </div>
           <h3 className="text-xl font-semibold text-gray-900 mb-2">Không tìm thấy phụ thu</h3>
           <p className="text-gray-500 mb-6">Không có phụ thu nào phù hợp với bộ lọc hiện tại</p>
-          {hasFilters && (
-            <Button 
-              onClick={clearFilters} 
-              className="bg-warning-600 hover:bg-warning-700 shadow-lg"
-            >
-              <span className="w-4 h-4 mr-2">{ICONS.X}</span>
-              Xóa tất cả bộ lọc
-            </Button>
-          )}
+          {/* "Tất cả" clears filters now; removed duplicate clear button */}
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
