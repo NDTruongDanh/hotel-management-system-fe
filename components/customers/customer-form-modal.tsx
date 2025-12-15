@@ -56,22 +56,25 @@ export function CustomerFormModal({
 
   useEffect(() => {
     if (!open) return;
-    if (customer) {
-      setFormData({
-        customerName: customer.customerName,
-        phoneNumber: customer.phoneNumber,
-        email: customer.email,
-        identityCard: customer.identityCard,
-        address: customer.address,
-        nationality: customer.nationality,
-        customerType: customer.customerType,
-        isVip: customer.isVip,
-        notes: customer.notes || "",
-      });
-    } else {
-      setFormData(defaultFormState);
-    }
-    setErrors({});
+
+    setTimeout(() => {
+      if (customer) {
+        setFormData({
+          customerName: customer.customerName,
+          phoneNumber: customer.phoneNumber,
+          email: customer.email,
+          identityCard: customer.identityCard,
+          address: customer.address,
+          nationality: customer.nationality,
+          customerType: customer.customerType,
+          isVip: customer.isVip,
+          notes: customer.notes || "",
+        });
+      } else {
+        setFormData(defaultFormState);
+      }
+      setErrors({});
+    }, 0);
   }, [customer, open]);
 
   const validate = () => {

@@ -15,7 +15,7 @@ import { RoomStatusChart } from "@/components/dashboard/room-status-chart";
 import { ArrivalsTable } from "@/components/dashboard/arrivals-table";
 import { DeparturesTable } from "@/components/dashboard/departures-table";
 import { useDashboardPage } from "@/hooks/use-dashboard-page";
-import { cn, formatCurrency } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 
 export default function DashboardPage() {
   const {

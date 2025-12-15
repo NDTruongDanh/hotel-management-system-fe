@@ -18,7 +18,6 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
 } from "@/components/ui/select";
 import { ICONS } from "@/src/constants/icons.enum";
 import type { Reservation } from "@/lib/types/reservation";
@@ -89,21 +88,26 @@ export function CheckInModal({
   // Initialize room assignments when reservation changes or modal opens
   // This useEffect is intentional - we need to reset form state based on props
   useEffect(() => {
-    if (reservation && open) {
-      const initialAssignments: RoomAssignment[] = reservation.details.map(
-        (detail) => ({
-          detailID: detail.detailID,
-          roomID: detail.roomID,
-          numberOfGuests: detail.numberOfGuests,
-        })
-      );
-      setRoomAssignments(initialAssignments);
-      setNotes("");
-    } else if (!open) {
+    if (!open) {
       // Reset state when modal closes
       setRoomAssignments([]);
       setNotes("");
+      return;
     }
+
+    setTimeout(() => {
+      if (reservation) {
+        const initialAssignments: RoomAssignment[] = reservation.details.map(
+          (detail) => ({
+            detailID: detail.detailID,
+            roomID: detail.roomID,
+            numberOfGuests: detail.numberOfGuests,
+          })
+        );
+        setRoomAssignments(initialAssignments);
+        setNotes("");
+      }
+    }, 0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reservation?.reservationID, open]);
 

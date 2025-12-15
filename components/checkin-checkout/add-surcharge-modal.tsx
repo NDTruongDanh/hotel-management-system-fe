@@ -89,10 +89,10 @@ export function AddSurchargeModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl bg-gradient-to-br from-white via-yellow-50/30 to-white">
+      <DialogContent className="max-w-2xl bg-linear-to-br from-white via-yellow-50/30 to-white">
         <DialogHeader className="border-b-2 border-yellow-200 pb-4">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-gradient-to-br from-yellow-600 to-yellow-500 rounded-xl flex items-center justify-center shadow-lg">
+            <div className="w-12 h-12 bg-linear-to-br from-yellow-600 to-yellow-500 rounded-xl flex items-center justify-center shadow-lg">
               <span className="w-6 h-6 text-white">{ICONS.PERCENT}</span>
             </div>
             <div>
@@ -184,7 +184,7 @@ export function AddSurchargeModal({
 
           {/* Preview */}
           {formData.amount > 0 && (
-            <div className="p-5 bg-gradient-to-r from-yellow-50 to-yellow-100 rounded-xl border-2 border-yellow-300">
+            <div className="p-5 bg-linear-to-r from-yellow-50 to-yellow-100 rounded-xl border-2 border-yellow-300">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-bold text-gray-700">Tổng phụ thu:</p>
@@ -212,7 +212,7 @@ export function AddSurchargeModal({
             </Button>
             <Button
               onClick={handleSubmit}
-              className="h-11 px-6 bg-gradient-to-r from-yellow-600 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 font-bold shadow-lg text-white"
+              className="h-11 px-6 bg-linear-to-r from-yellow-600 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 font-bold shadow-lg text-white"
             >
               <span className="w-4 h-4 mr-2">{ICONS.CHECK}</span>
               Xác nhận thêm
@@ -223,3 +223,4 @@ export function AddSurchargeModal({
     </Dialog>
   );
 }
+

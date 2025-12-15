@@ -48,22 +48,24 @@ export function RoomTypeFormModal({
   useEffect(() => {
     if (!open) return;
 
-    if (roomType) {
-      setFormData({
-        roomTypeName: roomType.roomTypeName,
-        price: roomType.price.toString(),
-        capacity: roomType.capacity.toString(),
-        amenities: roomType.amenities.join(", "),
-      });
-    } else {
-      setFormData({
-        roomTypeName: "",
-        price: "",
-        capacity: "",
-        amenities: "",
-      });
-    }
-    setErrors({});
+    setTimeout(() => {
+      if (roomType) {
+        setFormData({
+          roomTypeName: roomType.roomTypeName,
+          price: roomType.price.toString(),
+          capacity: roomType.capacity.toString(),
+          amenities: roomType.amenities.join(", "),
+        });
+      } else {
+        setFormData({
+          roomTypeName: "",
+          price: "",
+          capacity: "",
+          amenities: "",
+        });
+      }
+      setErrors({});
+    }, 0);
   }, [open, roomType]);
 
   const validateForm = () => {

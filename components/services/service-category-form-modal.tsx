@@ -136,7 +136,7 @@ export function ServiceCategoryFormModal({
             </Button>
             <Button
               type="submit"
-              className="h-11 px-6 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-600 font-bold shadow-lg"
+              className="h-11 px-6 bg-linear-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-600 font-bold shadow-lg"
             >
               <div className="w-4 h-4 mr-2 flex items-center justify-center">{ICONS.SAVE}</div>
               <span>
@@ -149,3 +149,4 @@ export function ServiceCategoryFormModal({
     </Dialog>
   );
 }
+

@@ -97,17 +97,17 @@ export function ServiceCard({
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
             />
           ) : (
-            <div className="w-full h-full bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center">
+            <div className="w-full h-full bg-linear-to-br from-blue-50 to-blue-100 flex items-center justify-center">
               <div className="w-12 h-12 text-blue-300 flex items-center justify-center">{categoryIcon}</div>
             </div>
           )}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent" />
           
           {/* Status badge */}
           <div className="absolute top-3 left-3">
             <Badge className={service.isActive 
-              ? "bg-gradient-to-r from-success-600 to-success-500 text-white text-xs font-bold shadow-lg" 
-              : "bg-gradient-to-r from-gray-500 to-gray-400 text-white text-xs font-bold shadow-lg"
+              ? "bg-linear-to-r from-success-600 to-success-500 text-white text-xs font-bold shadow-lg" 
+              : "bg-linear-to-r from-gray-500 to-gray-400 text-white text-xs font-bold shadow-lg"
             }>
               {service.isActive ? "Hoạt động" : "Tạm ngưng"}
             </Badge>
@@ -143,7 +143,7 @@ export function ServiceCard({
           {/* Price and Unit */}
           <div className="flex items-center justify-between mb-4 pb-4 border-b-2 border-gray-100">
             <div className="flex items-baseline gap-1.5">
-              <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-blue-500 bg-clip-text text-transparent">
+              <span className="text-xl font-bold bg-linear-to-r from-blue-600 to-blue-500 bg-clip-text text-transparent">
                 {formatCurrency(service.price)}
               </span>
               {service.unit && (
@@ -192,13 +192,13 @@ export function ServiceCard({
             </DialogDescription>
           </DialogHeader>
           <div className="py-4">
-            <div className="flex items-center gap-4 p-4 bg-gradient-to-br from-gray-50 to-white rounded-xl border-2 border-gray-200">
-              <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-blue-100 to-blue-50 flex items-center justify-center shrink-0 shadow-sm">
+            <div className="flex items-center gap-4 p-4 bg-linear-to-br from-gray-50 to-white rounded-xl border-2 border-gray-200">
+              <div className="w-14 h-14 rounded-xl bg-linear-to-br from-blue-100 to-blue-50 flex items-center justify-center shrink-0 shadow-sm">
                 <div className="w-7 h-7 text-blue-500 flex items-center justify-center">{categoryIcon}</div>
               </div>
               <div>
                 <p className="font-bold text-gray-900 text-base">{service.serviceName}</p>
-                <p className="text-sm font-bold bg-gradient-to-r from-blue-600 to-blue-500 bg-clip-text text-transparent">
+                <p className="text-sm font-bold bg-linear-to-r from-blue-600 to-blue-500 bg-clip-text text-transparent">
                   {formatCurrency(service.price)}
                 </p>
               </div>
@@ -217,3 +217,4 @@ export function ServiceCard({
     </>
   );
 }
+

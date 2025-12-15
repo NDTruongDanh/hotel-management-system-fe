@@ -39,7 +39,7 @@ export default function ServicesPage() {
   return (
     <div className="space-y-6 pb-8">
       {/* Modern Header with Gradient */}
-      <div className="bg-gradient-to-r from-blue-600 via-blue-500 to-blue-600 rounded-2xl p-8 shadow-xl">
+      <div className="bg-linear-to-r from-blue-600 via-blue-500 to-blue-600 rounded-2xl p-8 shadow-xl">
         <div className="flex items-center gap-4">
           <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-lg">
             <div className="w-8 h-8 flex items-center justify-center text-white">{ICONS.CLIPBOARD_LIST}</div>
@@ -134,3 +134,4 @@ export default function ServicesPage() {
     </div>
   );
 }
+

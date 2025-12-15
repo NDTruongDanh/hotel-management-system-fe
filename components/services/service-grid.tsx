@@ -73,7 +73,7 @@ export function ServiceGrid({
   return (
     <div className="space-y-6">
       {/* Modern Header with Search and Actions */}
-      <div className="bg-gradient-to-br from-white via-gray-50 to-white rounded-2xl border-2 border-gray-200 p-6 shadow-lg">
+      <div className="bg-linear-to-br from-white via-gray-50 to-white rounded-2xl border-2 border-gray-200 p-6 shadow-lg">
         <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
           <div className="flex-1 w-full lg:max-w-xl">
             <div className="relative">
@@ -111,7 +111,7 @@ export function ServiceGrid({
             {onCreate && (
               <Button 
                 onClick={onCreate} 
-                className="h-12 px-6 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-600 font-bold shadow-lg hover:shadow-xl transition-all hover:scale-105"
+                className="h-12 px-6 bg-linear-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-600 font-bold shadow-lg hover:shadow-xl transition-all hover:scale-105"
               >
                 <div className="w-5 h-5 mr-2 flex items-center justify-center">{ICONS.PLUS}</div>
                 Thêm dịch vụ
@@ -127,7 +127,7 @@ export function ServiceGrid({
           variant={selectedCategory === null ? "default" : "outline"}
           className={`cursor-pointer transition-all h-10 px-5 text-sm font-bold ${
             selectedCategory === null 
-              ? "bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-md hover:shadow-lg" 
+              ? "bg-linear-to-r from-blue-600 to-blue-500 text-white shadow-md hover:shadow-lg" 
               : "hover:bg-blue-50 hover:border-blue-300"
           }`}
           onClick={() => setSelectedCategory(null)}
@@ -142,7 +142,7 @@ export function ServiceGrid({
               variant={selectedCategory === category.categoryID ? "default" : "outline"}
               className={`cursor-pointer transition-all h-10 px-5 text-sm font-bold ${
                 selectedCategory === category.categoryID 
-                  ? "bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-md hover:shadow-lg" 
+                  ? "bg-linear-to-r from-blue-600 to-blue-500 text-white shadow-md hover:shadow-lg" 
                   : "hover:bg-blue-50 hover:border-blue-300"
               }`}
               onClick={() => setSelectedCategory(category.categoryID)}
@@ -184,7 +184,7 @@ export function ServiceGrid({
       </div>
 
       {/* Results Summary */}
-      <div className="flex items-center justify-between py-3 px-4 bg-gradient-to-r from-blue-50 to-white rounded-xl border-2 border-blue-100">
+      <div className="flex items-center justify-between py-3 px-4 bg-linear-to-r from-blue-50 to-white rounded-xl border-2 border-blue-100">
         <span className="text-sm font-bold text-gray-700">
           Hiển thị <span className="text-blue-600">{filteredServices.length}</span> / {services.length} dịch vụ
         </span>
@@ -192,8 +192,8 @@ export function ServiceGrid({
 
       {/* Service Grid by Category */}
       {filteredServices.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 bg-gradient-to-br from-gray-50 to-white rounded-2xl border-2 border-dashed border-gray-300">
-          <div className="w-20 h-20 mb-6 flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-50 rounded-full">
+        <div className="flex flex-col items-center justify-center py-20 bg-linear-to-br from-gray-50 to-white rounded-2xl border-2 border-dashed border-gray-300">
+          <div className="w-20 h-20 mb-6 flex items-center justify-center bg-linear-to-br from-gray-100 to-gray-50 rounded-full">
             <div className="w-12 h-12 text-gray-400 flex items-center justify-center">
               {ICONS.PACKAGE}
             </div>
@@ -258,3 +258,4 @@ export function ServiceGrid({
     </div>
   );
 }
+

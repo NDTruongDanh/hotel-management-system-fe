@@ -15,7 +15,6 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { SurchargeItem, SurchargeFormData } from "@/lib/types/surcharge";
-import { ICONS } from "@/src/constants/icons.enum";
 
 interface SurchargeFormModalProps {
   open: boolean;
@@ -149,7 +148,7 @@ export function SurchargeFormModal({
           </div>
 
           {/* Giá cố định checkbox */}
-          <div className="bg-gradient-to-br from-warning-50 to-warning-100/30 rounded-xl p-4 border border-warning-200">
+          <div className="bg-linear-to-br from-warning-50 to-warning-100/30 rounded-xl p-4 border border-warning-200">
             <div className="flex items-center space-x-3">
               <Checkbox
                 id="isOpenPrice"
@@ -233,3 +232,4 @@ export function SurchargeFormModal({
     </Dialog>
   );
 }
+

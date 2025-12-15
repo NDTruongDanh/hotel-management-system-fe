@@ -59,7 +59,7 @@ export function CheckInResultsTable({
   return (
     <div className="rounded-xl border-2 border-gray-200 bg-white shadow-sm overflow-hidden">
       <Table>
-        <TableHeader className="bg-gradient-to-r from-gray-50 to-gray-100 border-b-2 border-gray-200">
+        <TableHeader className="bg-linear-to-r from-gray-50 to-gray-100 border-b-2 border-gray-200">
           <TableRow>
             <TableHead className="font-bold text-gray-900 h-12">
               Mã đặt phòng
@@ -145,7 +145,7 @@ export function CheckInResultsTable({
                     <Button
                       onClick={() => onCheckIn(reservation)}
                       size="sm"
-                      className="h-9 px-4 bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-500 hover:to-primary-600 text-white font-semibold shadow-md hover:shadow-lg transition-all"
+                      className="h-9 px-4 bg-linear-to-r from-primary-600 to-primary-500 hover:from-primary-500 hover:to-primary-600 text-white font-semibold shadow-md hover:shadow-lg transition-all"
                     >
                       {ICONS.CHECK}
                       <span className="ml-1.5">Check-in</span>
@@ -160,3 +160,4 @@ export function CheckInResultsTable({
     </div>
   );
 }
+

@@ -73,7 +73,7 @@ export function CheckOutDetails({
   return (
     <div className="space-y-8">
       {/* Modern Header with Back Button */}
-      <div className="bg-gradient-to-br from-white via-gray-50 to-white rounded-2xl p-6 shadow-lg border-2 border-gray-100">
+      <div className="bg-linear-to-br from-white via-gray-50 to-white rounded-2xl p-6 shadow-lg border-2 border-gray-100">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Button
@@ -94,14 +94,14 @@ export function CheckOutDetails({
               </p>
             </div>
           </div>
-          <Badge className="h-8 px-4 bg-gradient-to-r from-primary-600 to-primary-500 text-white font-bold">
+          <Badge className="h-8 px-4 bg-linear-to-r from-primary-600 to-primary-500 text-white font-bold">
             Bước {currentStep}/3
           </Badge>
         </div>
       </div>
 
       {/* Modern 3-Step Progress Indicator */}
-      <div className="bg-gradient-to-br from-white via-gray-50 to-white rounded-2xl p-8 shadow-lg border-2 border-gray-100">
+      <div className="bg-linear-to-br from-white via-gray-50 to-white rounded-2xl p-8 shadow-lg border-2 border-gray-100">
         <div className="flex items-center justify-between">
           {CHECKOUT_STEPS.map((step, index) => (
             <div key={step.step} className="flex items-center flex-1">
@@ -110,9 +110,9 @@ export function CheckOutDetails({
                   className={cn(
                     "w-16 h-16 rounded-2xl flex items-center justify-center font-bold text-2xl transition-all shadow-lg",
                     currentStep === step.step
-                      ? "bg-gradient-to-br from-primary-600 to-primary-500 text-white scale-110"
+                      ? "bg-linear-to-br from-primary-600 to-primary-500 text-white scale-110"
                       : currentStep > step.step
-                      ? "bg-gradient-to-br from-success-600 to-success-500 text-white"
+                      ? "bg-linear-to-br from-success-600 to-success-500 text-white"
                       : "bg-gray-200 text-gray-400"
                   )}
                 >
@@ -144,7 +144,7 @@ export function CheckOutDetails({
                     className={cn(
                       "h-full rounded-full transition-all",
                       currentStep > step.step 
-                        ? "bg-gradient-to-r from-success-600 to-success-500 w-full" 
+                        ? "bg-linear-to-r from-success-600 to-success-500 w-full" 
                         : "w-0"
                     )}
                   />
@@ -159,9 +159,9 @@ export function CheckOutDetails({
       {currentStep === 1 && (
         <div className="space-y-6">
           <Card className="border-2 border-gray-200 shadow-lg rounded-2xl overflow-hidden">
-            <CardHeader className="bg-gradient-to-r from-gray-50 to-white border-b-2 border-gray-200">
+            <CardHeader className="bg-linear-to-r from-gray-50 to-white border-b-2 border-gray-200">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-primary-600 to-primary-500 rounded-xl flex items-center justify-center">
+                <div className="w-10 h-10 bg-linear-to-br from-primary-600 to-primary-500 rounded-xl flex items-center justify-center">
                   <span className="w-5 h-5 text-white">{ICONS.USER}</span>
                 </div>
                 <CardTitle className="text-xl font-extrabold text-gray-900">
@@ -209,10 +209,10 @@ export function CheckOutDetails({
             </CardContent>
           </Card>
 
-          <Card className="border-2 border-primary-200 shadow-lg rounded-2xl overflow-hidden bg-gradient-to-br from-primary-50 to-white">
-            <CardHeader className="bg-gradient-to-r from-primary-100 to-primary-50 border-b-2 border-primary-200">
+          <Card className="border-2 border-primary-200 shadow-lg rounded-2xl overflow-hidden bg-linear-to-br from-primary-50 to-white">
+            <CardHeader className="bg-linear-to-r from-primary-100 to-primary-50 border-b-2 border-primary-200">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-primary-600 to-primary-500 rounded-xl flex items-center justify-center">
+                <div className="w-10 h-10 bg-linear-to-br from-primary-600 to-primary-500 rounded-xl flex items-center justify-center">
                   <span className="w-5 h-5 text-white">{ICONS.HOME}</span>
                 </div>
                 <CardTitle className="text-xl font-extrabold text-gray-900">
@@ -235,7 +235,7 @@ export function CheckOutDetails({
           <div className="flex justify-end">
             <Button
               onClick={handleNextStep}
-              className="h-12 px-8 bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-500 hover:to-primary-600 text-white font-bold text-base shadow-lg hover:shadow-xl transition-all hover:scale-105"
+              className="h-12 px-8 bg-linear-to-r from-primary-600 to-primary-500 hover:from-primary-500 hover:to-primary-600 text-white font-bold text-base shadow-lg hover:shadow-xl transition-all hover:scale-105"
             >
               <span>Tiếp theo: Dịch vụ, Phạt & Phụ thu</span>
               <span className="w-5 h-5 ml-2">{ICONS.CHEVRON_RIGHT}</span>
@@ -249,10 +249,10 @@ export function CheckOutDetails({
         <div className="space-y-6">
           {/* Services Card */}
           <Card className="border-2 border-gray-200 shadow-lg rounded-2xl overflow-hidden">
-            <CardHeader className="bg-gradient-to-r from-blue-50 to-white border-b-2 border-gray-200">
+            <CardHeader className="bg-linear-to-r from-blue-50 to-white border-b-2 border-gray-200">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-500 rounded-xl flex items-center justify-center">
+                  <div className="w-10 h-10 bg-linear-to-br from-blue-600 to-blue-500 rounded-xl flex items-center justify-center">
                     <span className="w-5 h-5 text-white">{ICONS.CLIPBOARD_LIST}</span>
                   </div>
                   <CardTitle className="text-xl font-extrabold text-gray-900">
@@ -262,7 +262,7 @@ export function CheckOutDetails({
                 <Button
                   onClick={onAddService}
                   size="sm"
-                  className="h-10 px-5 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-600 text-white font-bold shadow-md hover:shadow-lg transition-all"
+                  className="h-10 px-5 bg-linear-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-600 text-white font-bold shadow-md hover:shadow-lg transition-all"
                 >
                   <span className="w-4 h-4 mr-2">{ICONS.PLUS}</span>
                   POST Dịch vụ
@@ -284,7 +284,7 @@ export function CheckOutDetails({
                   {summary.services.map((service, idx) => (
                     <div
                       key={idx}
-                      className="flex justify-between items-center p-4 bg-gradient-to-r from-gray-50 to-white rounded-xl border-2 border-gray-200 hover:border-blue-300 transition-all"
+                      className="flex justify-between items-center p-4 bg-linear-to-r from-gray-50 to-white rounded-xl border-2 border-gray-200 hover:border-blue-300 transition-all"
                     >
                       <div>
                         <p className="font-bold text-gray-900">{service.serviceName}</p>
@@ -311,10 +311,10 @@ export function CheckOutDetails({
 
           {/* Penalties Card */}
           <Card className="border-2 border-gray-200 shadow-lg rounded-2xl overflow-hidden">
-            <CardHeader className="bg-gradient-to-r from-red-50 to-white border-b-2 border-gray-200">
+            <CardHeader className="bg-linear-to-r from-red-50 to-white border-b-2 border-gray-200">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-gradient-to-br from-red-600 to-red-500 rounded-xl flex items-center justify-center">
+                  <div className="w-10 h-10 bg-linear-to-br from-red-600 to-red-500 rounded-xl flex items-center justify-center">
                     <span className="w-5 h-5 text-white">{ICONS.PENALTY}</span>
                   </div>
                   <CardTitle className="text-xl font-extrabold text-gray-900">
@@ -347,7 +347,7 @@ export function CheckOutDetails({
                   {summary.penalties.map((penalty, idx) => (
                     <div
                       key={idx}
-                      className="flex justify-between items-center p-4 bg-gradient-to-r from-gray-50 to-white rounded-xl border-2 border-gray-200 hover:border-red-300 transition-all"
+                      className="flex justify-between items-center p-4 bg-linear-to-r from-gray-50 to-white rounded-xl border-2 border-gray-200 hover:border-red-300 transition-all"
                     >
                       <div>
                         <p className="font-bold text-gray-900">{penalty.description}</p>
@@ -372,10 +372,10 @@ export function CheckOutDetails({
 
           {/* Surcharges Card */}
           <Card className="border-2 border-gray-200 shadow-lg rounded-2xl overflow-hidden">
-            <CardHeader className="bg-gradient-to-r from-yellow-50 to-white border-b-2 border-gray-200">
+            <CardHeader className="bg-linear-to-r from-yellow-50 to-white border-b-2 border-gray-200">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-gradient-to-br from-yellow-600 to-yellow-500 rounded-xl flex items-center justify-center">
+                  <div className="w-10 h-10 bg-linear-to-br from-yellow-600 to-yellow-500 rounded-xl flex items-center justify-center">
                     <span className="w-5 h-5 text-white">{ICONS.SURCHARGE}</span>
                   </div>
                   <CardTitle className="text-xl font-extrabold text-gray-900">
@@ -410,7 +410,7 @@ export function CheckOutDetails({
                   {summary.surcharges.map((surcharge, idx) => (
                     <div
                       key={idx}
-                      className="flex justify-between items-center p-4 bg-gradient-to-r from-gray-50 to-white rounded-xl border-2 border-gray-200 hover:border-yellow-300 transition-all"
+                      className="flex justify-between items-center p-4 bg-linear-to-r from-gray-50 to-white rounded-xl border-2 border-gray-200 hover:border-yellow-300 transition-all"
                     >
                       <div>
                         <p className="font-bold text-gray-900">{surcharge.surchargeName}</p>
@@ -447,7 +447,7 @@ export function CheckOutDetails({
             </Button>
             <Button
               onClick={handleNextStep}
-              className="h-12 px-8 bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-500 hover:to-primary-600 text-white font-bold text-base shadow-lg hover:shadow-xl transition-all hover:scale-105"
+              className="h-12 px-8 bg-linear-to-r from-primary-600 to-primary-500 hover:from-primary-500 hover:to-primary-600 text-white font-bold text-base shadow-lg hover:shadow-xl transition-all hover:scale-105"
             >
               <span>Tiếp theo: Thanh toán</span>
               <span className="w-5 h-5 ml-2">{ICONS.CHEVRON_RIGHT}</span>
@@ -460,7 +460,7 @@ export function CheckOutDetails({
       {currentStep === 3 && (
         <div className="space-y-6">
           <Card className="border-2 border-primary-200 shadow-xl rounded-2xl overflow-hidden">
-            <CardHeader className="bg-gradient-to-br from-primary-600 via-primary-500 to-primary-600 text-white border-b-2 border-primary-700">
+            <CardHeader className="bg-linear-to-br from-primary-600 via-primary-500 to-primary-600 text-white border-b-2 border-primary-700">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-lg">
                   <span className="w-6 h-6 text-white">{ICONS.RECEIPT}</span>
@@ -494,7 +494,7 @@ export function CheckOutDetails({
               
               <Separator className="my-6" />
               
-              <div className="flex justify-between items-center p-6 bg-gradient-to-r from-primary-100 to-primary-50 rounded-2xl border-2 border-primary-300 shadow-lg">
+              <div className="flex justify-between items-center p-6 bg-linear-to-r from-primary-100 to-primary-50 rounded-2xl border-2 border-primary-300 shadow-lg">
                 <span className="text-2xl font-extrabold text-gray-900">TỔNG THANH TOÁN:</span>
                 <span className="text-4xl font-black text-primary-600">
                   {formatCurrency(grandTotal)}
@@ -523,7 +523,7 @@ export function CheckOutDetails({
               </Button>
               <Button
                 onClick={onCompleteCheckout}
-                className="h-12 px-10 bg-gradient-to-r from-success-600 to-success-500 hover:from-success-500 hover:to-success-600 text-white font-extrabold text-base shadow-xl hover:shadow-2xl transition-all hover:scale-105"
+                className="h-12 px-10 bg-linear-to-r from-success-600 to-success-500 hover:from-success-500 hover:to-success-600 text-white font-extrabold text-base shadow-xl hover:shadow-2xl transition-all hover:scale-105"
               >
                 <span className="w-5 h-5 mr-2">{ICONS.CHECK_CIRCLE}</span>
                 Tiếp tục: Thanh toán
@@ -536,3 +536,4 @@ export function CheckOutDetails({
     </div>
   );
 }
+

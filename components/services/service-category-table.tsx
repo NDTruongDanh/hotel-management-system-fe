@@ -63,7 +63,7 @@ export function ServiceCategoryTable({
       <div className="rounded-2xl border-2 border-gray-200 bg-white shadow-lg overflow-hidden">
         <Table>
           <TableHeader>
-            <TableRow className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-600 hover:to-blue-500">
+            <TableRow className="bg-linear-to-r from-blue-600 to-blue-500 hover:from-blue-600 hover:to-blue-500">
               <TableHead className="font-bold text-white text-base h-14">
                 Mã loại
               </TableHead>
@@ -89,7 +89,7 @@ export function ServiceCategoryTable({
               <TableRow>
                 <TableCell colSpan={6} className="text-center py-16">
                   <div className="flex flex-col items-center justify-center text-gray-500">
-                    <div className="w-16 h-16 mb-4 flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-50 rounded-full">
+                    <div className="w-16 h-16 mb-4 flex items-center justify-center bg-linear-to-br from-gray-100 to-gray-50 rounded-full">
                       <div className="w-10 h-10 text-gray-400 flex items-center justify-center">{ICONS.INFO}</div>
                     </div>
                     <p className="text-lg font-bold text-gray-700">Chưa có loại dịch vụ nào</p>
@@ -114,11 +114,11 @@ export function ServiceCategoryTable({
                   </TableCell>
                   <TableCell>
                     {category.isActive ? (
-                      <Badge className="bg-gradient-to-r from-success-600 to-success-500 text-white hover:from-success-500 hover:to-success-600 font-bold shadow-sm">
+                      <Badge className="bg-linear-to-r from-success-600 to-success-500 text-white hover:from-success-500 hover:to-success-600 font-bold shadow-sm">
                         Hoạt động
                       </Badge>
                     ) : (
-                      <Badge className="bg-gradient-to-r from-gray-500 to-gray-400 text-white hover:from-gray-400 hover:to-gray-500 font-bold shadow-sm">
+                      <Badge className="bg-linear-to-r from-gray-500 to-gray-400 text-white hover:from-gray-400 hover:to-gray-500 font-bold shadow-sm">
                         Ngừng hoạt động
                       </Badge>
                     )}
@@ -169,10 +169,10 @@ export function ServiceCategoryTable({
             </DialogDescription>
           </DialogHeader>
           <div className="py-3">
-            <div className="p-4 bg-gradient-to-br from-red-50 to-white rounded-xl border-2 border-red-100">
+            <div className="p-4 bg-linear-to-br from-red-50 to-white rounded-xl border-2 border-red-100">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 flex items-center justify-center bg-gradient-to-br from-red-100 to-red-50 rounded-full shrink-0">
-                  <div className="w-6 h-6 text-red-500 flex items-center justify-center">{ICONS.ALERT_TRIANGLE}</div>
+                <div className="w-12 h-12 flex items-center justify-center bg-linear-to-br from-red-100 to-red-50 rounded-full shrink-0">
+                  <div className="w-6 h-6 text-red-500 flex items-center justify-center">{ICONS.PENALTY}</div>
                 </div>
                 <div>
                   <p className="text-sm font-bold text-gray-900">Cảnh báo</p>
@@ -191,7 +191,7 @@ export function ServiceCategoryTable({
             </Button>
             <Button
               onClick={handleConfirmDelete}
-              className="h-11 px-6 bg-gradient-to-r from-error-600 to-error-500 hover:from-error-500 hover:to-error-600 font-bold shadow-lg"
+              className="h-11 px-6 bg-linear-to-r from-error-600 to-error-500 hover:from-error-500 hover:to-error-600 font-bold shadow-lg"
             >
               Xóa loại dịch vụ
             </Button>
@@ -201,3 +201,4 @@ export function ServiceCategoryTable({
     </>
   );
 }
+

@@ -60,8 +60,10 @@ export function PenaltyFormModal({
   // Update form data when penalty or mode changes
   useEffect(() => {
     if (open) {
-      setFormData(getInitialFormData(mode, penalty));
-      setErrors({});
+      setTimeout(() => {
+        setFormData(getInitialFormData(mode, penalty));
+        setErrors({});
+      }, 0);
     }
   }, [open, mode, penalty]);
 

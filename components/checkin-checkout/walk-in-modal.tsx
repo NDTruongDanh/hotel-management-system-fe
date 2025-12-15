@@ -22,7 +22,6 @@ import {
 import { ICONS } from "@/src/constants/icons.enum";
 import { mockRooms } from "@/lib/mock-rooms";
 import { mockRoomTypes } from "@/lib/mock-room-types";
-import type { Room } from "@/lib/types/room";
 
 interface WalkInModalProps {
   open: boolean;
@@ -162,10 +161,10 @@ export function WalkInModal({ open, onOpenChange, onConfirm }: WalkInModalProps)
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[95vh] overflow-hidden flex flex-col bg-gradient-to-br from-white via-gray-50 to-white">
+      <DialogContent className="max-w-4xl max-h-[95vh] overflow-hidden flex flex-col bg-linear-to-br from-white via-gray-50 to-white">
         <DialogHeader className="border-b-2 border-gray-200 pb-4">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-gradient-to-br from-success-600 to-success-500 rounded-xl flex items-center justify-center shadow-lg">
+            <div className="w-12 h-12 bg-linear-to-br from-success-600 to-success-500 rounded-xl flex items-center justify-center shadow-lg">
               <div className="w-6 h-6 flex items-center justify-center text-white">{ICONS.USER_PLUS}</div>
             </div>
             <div>
@@ -379,7 +378,7 @@ export function WalkInModal({ open, onOpenChange, onConfirm }: WalkInModalProps)
 
             {/* Summary */}
             {totalAmount > 0 && (
-              <div className="mt-6 p-4 bg-gradient-to-r from-primary-50 to-primary-100 rounded-lg border-2 border-primary-200">
+              <div className="mt-6 p-4 bg-linear-to-r from-primary-50 to-primary-100 rounded-lg border-2 border-primary-200">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-bold text-gray-700">Tổng tiền phòng dự kiến:</span>
                   <span className="text-2xl font-extrabold text-primary-600">
@@ -403,7 +402,7 @@ export function WalkInModal({ open, onOpenChange, onConfirm }: WalkInModalProps)
             </Button>
             <Button
               onClick={handleSubmit}
-              className="h-11 px-6 bg-gradient-to-r from-success-600 to-success-500 hover:from-success-500 hover:to-success-600 font-bold shadow-lg text-white"
+              className="h-11 px-6 bg-linear-to-r from-success-600 to-success-500 hover:from-success-500 hover:to-success-600 font-bold shadow-lg text-white"
             >
               <div className="w-4 h-4 mr-2 flex items-center justify-center">{ICONS.CHECK}</div>
               Xác nhận Check-in
@@ -414,3 +413,4 @@ export function WalkInModal({ open, onOpenChange, onConfirm }: WalkInModalProps)
     </Dialog>
   );
 }
+

@@ -87,7 +87,7 @@ export function RoomFilters({
                 placeholder="Nhập tên phòng, mã phòng để tìm kiếm..."
                 value={searchQuery}
                 onChange={(e) => onSearchChange(e.target.value)}
-                className="pl-12 h-12 bg-gradient-to-r from-gray-50 to-white border-gray-300 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all shadow-sm text-base font-medium"
+                className="pl-12 h-12 bg-linear-to-r from-gray-50 to-white border-gray-300 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all shadow-sm text-base font-medium"
               />
             </div>
           </div>
@@ -121,7 +121,7 @@ export function RoomFilters({
                   })
                 }
               >
-                <SelectTrigger className="h-14 bg-gradient-to-r from-gray-50 to-white border-gray-300 hover:border-primary-400 transition-all shadow-sm font-semibold text-base">
+                <SelectTrigger className="h-14 bg-linear-to-r from-gray-50 to-white border-gray-300 hover:border-primary-400 transition-all shadow-sm font-semibold text-base">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -177,7 +177,7 @@ export function RoomFilters({
                   onFiltersChange({ ...filters, roomType: value })
                 }
               >
-                <SelectTrigger className="h-14 bg-gradient-to-r from-gray-50 to-white border-gray-300 hover:border-primary-400 transition-all shadow-sm font-semibold text-base">
+                <SelectTrigger className="h-14 bg-linear-to-r from-gray-50 to-white border-gray-300 hover:border-primary-400 transition-all shadow-sm font-semibold text-base">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -211,7 +211,7 @@ export function RoomFilters({
                   })
                 }
               >
-                <SelectTrigger className="h-14 bg-gradient-to-r from-gray-50 to-white border-gray-300 hover:border-primary-400 transition-all shadow-sm font-semibold text-base">
+                <SelectTrigger className="h-14 bg-linear-to-r from-gray-50 to-white border-gray-300 hover:border-primary-400 transition-all shadow-sm font-semibold text-base">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -256,3 +256,4 @@ export function RoomFilters({
     </Card>
   );
 }
+

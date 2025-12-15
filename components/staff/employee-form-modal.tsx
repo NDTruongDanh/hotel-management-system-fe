@@ -55,32 +55,34 @@ export function EmployeeFormModal({
   useEffect(() => {
     if (!open) return;
 
-    if (employee) {
-      setFormData({
-        fullName: employee.fullName,
-        email: employee.email,
-        phoneNumber: employee.phoneNumber,
-        position: employee.position,
-        dateOfBirth: employee.dateOfBirth
-          ? new Date(employee.dateOfBirth).toISOString().split("T")[0]
-          : "",
-        address: employee.address || "",
-        identityCard: employee.identityCard || "",
-        startDate: new Date(employee.startDate).toISOString().split("T")[0],
-      });
-    } else {
-      setFormData({
-        fullName: "",
-        email: "",
-        phoneNumber: "",
-        position: "",
-        dateOfBirth: "",
-        address: "",
-        identityCard: "",
-        startDate: new Date().toISOString().split("T")[0],
-      });
-    }
-    setErrors({});
+    setTimeout(() => {
+      if (employee) {
+        setFormData({
+          fullName: employee.fullName,
+          email: employee.email,
+          phoneNumber: employee.phoneNumber,
+          position: employee.position,
+          dateOfBirth: employee.dateOfBirth
+            ? new Date(employee.dateOfBirth).toISOString().split("T")[0]
+            : "",
+          address: employee.address || "",
+          identityCard: employee.identityCard || "",
+          startDate: new Date(employee.startDate).toISOString().split("T")[0],
+        });
+      } else {
+        setFormData({
+          fullName: "",
+          email: "",
+          phoneNumber: "",
+          position: "",
+          dateOfBirth: "",
+          address: "",
+          identityCard: "",
+          startDate: new Date().toISOString().split("T")[0],
+        });
+      }
+      setErrors({});
+    }, 0);
   }, [open, employee]);
 
   const validateForm = () => {

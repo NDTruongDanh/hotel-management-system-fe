@@ -52,13 +52,15 @@ export default function ReservationsPage() {
 
     const total = reservations.length;
     const todayReservations = reservations.filter(r => {
-      const checkIn = new Date(r.checkInDate);
+      if (!r.details || r.details.length === 0) return false;
+      const checkIn = new Date(r.details[0].checkInDate);
       checkIn.setHours(0, 0, 0, 0);
       return checkIn.getTime() === today.getTime();
     }).length;
     
     const upcomingCheckIns = reservations.filter(r => {
-      const checkIn = new Date(r.checkInDate);
+      if (!r.details || r.details.length === 0) return false;
+      const checkIn = new Date(r.details[0].checkInDate);
       return checkIn >= today && checkIn <= nextWeek && (r.status === "Đã đặt" || r.status === "Đã xác nhận");
     }).length;
     

@@ -79,7 +79,7 @@ export default function CheckinCheckoutPage() {
   return (
     <div className="space-y-6 pb-8">
       {/* Modern Header with Gradient */}
-      <div className="bg-gradient-to-r from-primary-600 via-primary-500 to-primary-600 rounded-2xl p-8 shadow-xl">
+      <div className="bg-linear-to-r from-primary-600 via-primary-500 to-primary-600 rounded-2xl p-8 shadow-xl">
         <div className="flex items-center gap-4">
           <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-lg">
             <span className="w-8 h-8 text-white">{ICONS.CALENDAR_CHECK}</span>
@@ -107,17 +107,17 @@ export default function CheckinCheckoutPage() {
 
       <Tabs defaultValue="checkin" className="space-y-6">
         <div className="flex justify-center">
-          <TabsList className="inline-flex h-16 items-center justify-center rounded-2xl bg-gradient-to-br from-white via-gray-50 to-white p-1.5 shadow-lg border-2 border-gray-200/50">
+          <TabsList className="inline-flex h-16 items-center justify-center rounded-2xl bg-linear-to-br from-white via-gray-50 to-white p-1.5 shadow-lg border-2 border-gray-200/50">
             <TabsTrigger 
               value="checkin" 
-              className="gap-3 h-full px-8 rounded-xl data-[state=active]:bg-gradient-to-br data-[state=active]:from-primary-600 data-[state=active]:to-primary-500 data-[state=active]:shadow-lg data-[state=active]:text-white font-bold text-base transition-all hover:scale-105"
+              className="gap-3 h-full px-8 rounded-xl data-[state=active]:bg-linear-to-br data-[state=active]:from-primary-600 data-[state=active]:to-primary-500 data-[state=active]:shadow-lg data-[state=active]:text-white font-bold text-base transition-all hover:scale-105"
             >
               <span className="w-5 h-5">{ICONS.CALENDAR_CHECK}</span>
               Check-in
             </TabsTrigger>
             <TabsTrigger 
               value="checkout" 
-              className="gap-3 h-full px-8 rounded-xl data-[state=active]:bg-gradient-to-br data-[state=active]:from-primary-600 data-[state=active]:to-primary-500 data-[state=active]:shadow-lg data-[state=active]:text-white font-bold text-base transition-all hover:scale-105"
+              className="gap-3 h-full px-8 rounded-xl data-[state=active]:bg-linear-to-br data-[state=active]:from-primary-600 data-[state=active]:to-primary-500 data-[state=active]:shadow-lg data-[state=active]:text-white font-bold text-base transition-all hover:scale-105"
             >
               <span className="w-5 h-5">{ICONS.DOOR_OPEN}</span>
               Check-out
@@ -207,3 +207,4 @@ export default function CheckinCheckoutPage() {
     </div>
   );
 }
+

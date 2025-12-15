@@ -181,8 +181,8 @@ export function SurchargeGrid({
 
       {/* Surcharge Grid */}
       {filteredSurcharges.length === 0 ? (
-        <div className="text-center py-20 bg-gradient-to-br from-gray-50 to-gray-100/50 rounded-2xl border-2 border-dashed border-gray-200">
-          <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-warning-100 to-warning-50 flex items-center justify-center shadow-lg">
+        <div className="text-center py-20 bg-linear-to-br from-gray-50 to-gray-100/50 rounded-2xl border-2 border-dashed border-gray-200">
+          <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-linear-to-br from-warning-100 to-warning-50 flex items-center justify-center shadow-lg">
             <span className="w-10 h-10 text-warning-500 flex items-center justify-center">{ICONS.SURCHARGE}</span>
           </div>
           <h3 className="text-xl font-semibold text-gray-900 mb-2">Không tìm thấy phụ thu</h3>
@@ -205,3 +205,4 @@ export function SurchargeGrid({
     </div>
   );
 }
+

@@ -73,8 +73,8 @@ export function SurchargeCard({
           {/* Status badge */}
           <div className="absolute top-3 left-3">
             <Badge className={surcharge.isActive 
-              ? "bg-gradient-to-r from-success-600 to-success-500 text-white text-xs font-semibold shadow-lg border-0" 
-              : "bg-gradient-to-r from-gray-600 to-gray-500 text-white text-xs font-semibold shadow-lg border-0"
+              ? "bg-linear-to-r from-success-600 to-success-500 text-white text-xs font-semibold shadow-lg border-0" 
+              : "bg-linear-to-r from-gray-600 to-gray-500 text-white text-xs font-semibold shadow-lg border-0"
             }>
               {surcharge.isActive ? "Hoạt động" : "Tạm ngưng"}
             </Badge>
@@ -83,7 +83,7 @@ export function SurchargeCard({
           {/* Open price indicator */}
           {surcharge.isOpenPrice && (
             <div className="absolute top-3 right-3">
-              <Badge className="bg-gradient-to-r from-warning-500 to-warning-600 text-white text-xs font-semibold shadow-lg border-0">
+              <Badge className="bg-linear-to-r from-warning-500 to-warning-600 text-white text-xs font-semibold shadow-lg border-0">
                 <span className="w-3 h-3 mr-1">{ICONS.PERCENT}</span>
                 Giá linh hoạt
               </Badge>
@@ -146,7 +146,7 @@ export function SurchargeCard({
               variant="outline"
               size="sm"
               onClick={() => setDeleteConfirm(true)}
-              className="h-9 px-3 font-medium text-error-600 border-error-300 hover:bg-gradient-to-r hover:from-error-50 hover:to-error-100 transition-all"
+              className="h-9 px-3 font-medium text-error-600 border-error-300 hover:bg-linear-to-r hover:from-error-50 hover:to-error-100 transition-all"
             >
               <span className="w-4 h-4">{ICONS.TRASH}</span>
             </Button>
@@ -166,7 +166,7 @@ export function SurchargeCard({
           <div className="py-4">
             <div className="bg-linear-to-br from-warning-50 to-warning-100/50 border-2 border-warning-200 rounded-xl p-4">
               <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-warning-500 to-warning-600 flex items-center justify-center shrink-0 shadow-lg">
+                <div className="w-14 h-14 rounded-xl bg-linear-to-br from-warning-500 to-warning-600 flex items-center justify-center shrink-0 shadow-lg">
                   <span className="w-7 h-7 text-white">{ICONS.SURCHARGE}</span>
                 </div>
                 <div className="flex-1 min-w-0">
@@ -203,3 +203,4 @@ export function SurchargeCard({
     </>
   );
 }
+
