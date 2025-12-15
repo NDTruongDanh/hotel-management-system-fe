@@ -51,21 +51,16 @@ export function EmployeesTab({
         onSearchChange={onSearchChange}
         onStatusChange={onStatusChange}
         onAccountChange={onAccountChange}
-        onAddEmployee={onAddEmployee}
+        onClearFilters={onClearFilters}
+        hasFilters={hasFilters}
       />
 
       {/* Results Summary */}
       <div className="flex items-center justify-between text-sm text-gray-600">
         <p>
-          Hiển thị <span className="font-medium">{employees.length}</span> nhân
+          Hiển thị <span className="font-medium text-info-600">{employees.length}</span> nhân
           viên
         </p>
-        {hasFilters && (
-          <Button variant="ghost" size="sm" onClick={onClearFilters}>
-            <span className="w-4 h-4 mr-1">{ICONS.X}</span>
-            Xóa bộ lọc
-          </Button>
-        )}
       </div>
 
       {/* Employee Grid */}
