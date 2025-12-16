@@ -66,6 +66,8 @@ import {
   ArrowUpDown,
   Star,
   Percent,
+  Play,
+  History,
 } from "lucide-react";
 
 export const ICONS = {
@@ -139,4 +141,8 @@ export const ICONS = {
   FOLDER: <Folder />,
   PERCENT: <Percent />,
   STAR: <Star />,
+  PLAY: <Play />,
+  HISTORY: <History />,
+  ALERT_TRIANGLE: <AlertTriangle />,
+  SPARKLES: <Sparkles />,
 };
