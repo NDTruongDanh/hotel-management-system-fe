@@ -128,23 +128,23 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         data-sidebar-state={state}
         {...props}
       >
-        <SidebarHeader className="border-b border-gray-200 bg-white">
-          <div className="flex items-center gap-2 px-4 py-3 group-data-[collapsible=icon]:px-2 group-data-[collapsible=icon]:justify-center">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary-600 text-white">
-              {ICONS.HOTEL}
+        <SidebarHeader className="border-b border-primary-100 bg-gradient-to-br from-primary-50 via-white to-primary-50/30">
+          <div className="flex items-center gap-3 px-4 py-4 group-data-[collapsible=icon]:px-2 group-data-[collapsible=icon]:justify-center">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary-600 to-primary-500 text-white shadow-lg shadow-primary-600/20">
+              <span className="text-lg">{ICONS.HOTEL}</span>
             </div>
             <div className="flex flex-col overflow-hidden group-data-[collapsible=icon]:hidden">
-              <span className="text-base font-semibold text-gray-900 truncate">
+              <span className="text-base font-bold text-gray-900 truncate">
                 UIT Hotel System
               </span>
-              <span className="text-xs text-gray-500 truncate">
+              <span className="text-xs text-gray-600 truncate font-medium">
                 Quản lý khách sạn
               </span>
             </div>
           </div>
         </SidebarHeader>
 
-        <SidebarContent className="bg-gray-50 scrollbar-hide">
+        <SidebarContent className="bg-gradient-to-b from-gray-50 to-white scrollbar-hide">
           {/* Dashboard */}
           <SidebarGroup>
             <SidebarGroupContent>
@@ -158,19 +158,19 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                           <SidebarMenuButton
                             asChild
                             className={cn(
-                              "transition-colors",
+                              "transition-all duration-200 h-11 text-sm font-medium",
                               isActive
-                                ? "bg-primary-100 text-primary-600 border-l-4 border-primary-600 hover:bg-primary-100"
-                                : "hover:bg-primary-100 hover:text-primary-600 text-gray-700"
+                                ? "bg-gradient-to-r from-primary-600 to-primary-500 text-white border-l-4 border-primary-700 hover:from-primary-700 hover:to-primary-600 shadow-md"
+                                : "hover:bg-primary-50 hover:text-primary-700 text-gray-700 hover:border-l-4 hover:border-primary-300"
                             )}
                           >
-                            <Link href={item.url}>
-                              {item.icon}
+                            <Link href={item.url} className="flex items-center gap-3">
+                              <span className={cn("w-5 h-5", isActive && "drop-shadow-sm")}>{item.icon}</span>
                               <span>{item.title}</span>
                             </Link>
                           </SidebarMenuButton>
                         </TooltipTrigger>
-                        <TooltipContent side="right">
+                        <TooltipContent side="right" className="bg-gray-900 text-white border-gray-700">
                           {item.title}
                         </TooltipContent>
                       </Tooltip>
@@ -183,7 +183,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
           {/* Room Management */}
           <SidebarGroup>
-            <SidebarGroupLabel className="text-xs font-semibold text-gray-700 uppercase tracking-wider">
+            <SidebarGroupLabel className="text-[11px] font-bold text-gray-500 uppercase tracking-widest px-4 py-2">
               Quản lý Phòng
             </SidebarGroupLabel>
             <SidebarGroupContent>
@@ -197,19 +197,19 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                           <SidebarMenuButton
                             asChild
                             className={cn(
-                              "transition-colors",
+                              "transition-all duration-200 h-11 text-sm font-medium",
                               isActive
-                                ? "bg-primary-100 text-primary-600 border-l-4 border-primary-600 hover:bg-primary-100"
-                                : "hover:bg-primary-100 hover:text-primary-600 text-gray-700"
+                                ? "bg-gradient-to-r from-primary-600 to-primary-500 text-white border-l-4 border-primary-700 hover:from-primary-700 hover:to-primary-600 shadow-md"
+                                : "hover:bg-primary-50 hover:text-primary-700 text-gray-700 hover:border-l-4 hover:border-primary-300"
                             )}
                           >
-                            <Link href={item.url}>
-                              {item.icon}
+                            <Link href={item.url} className="flex items-center gap-3">
+                              <span className={cn("w-5 h-5", isActive && "drop-shadow-sm")}>{item.icon}</span>
                               <span>{item.title}</span>
                             </Link>
                           </SidebarMenuButton>
                         </TooltipTrigger>
-                        <TooltipContent side="right">
+                        <TooltipContent side="right" className="bg-gray-900 text-white border-gray-700">
                           {item.title}
                         </TooltipContent>
                       </Tooltip>
@@ -222,7 +222,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
           {/* Booking Management */}
           <SidebarGroup>
-            <SidebarGroupLabel className="text-xs font-semibold text-gray-700 uppercase tracking-wider">
+            <SidebarGroupLabel className="text-[11px] font-bold text-gray-500 uppercase tracking-widest px-4 py-2">
               Đặt Phòng & Check-in/out
             </SidebarGroupLabel>
             <SidebarGroupContent>
@@ -236,19 +236,19 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                           <SidebarMenuButton
                             asChild
                             className={cn(
-                              "transition-colors",
+                              "transition-all duration-200 h-11 text-sm font-medium",
                               isActive
-                                ? "bg-primary-100 text-primary-600 border-l-4 border-primary-600 hover:bg-primary-100"
-                                : "hover:bg-primary-100 hover:text-primary-600 text-gray-700"
+                                ? "bg-gradient-to-r from-primary-600 to-primary-500 text-white border-l-4 border-primary-700 hover:from-primary-700 hover:to-primary-600 shadow-md"
+                                : "hover:bg-primary-50 hover:text-primary-700 text-gray-700 hover:border-l-4 hover:border-primary-300"
                             )}
                           >
-                            <Link href={item.url}>
-                              {item.icon}
+                            <Link href={item.url} className="flex items-center gap-3">
+                              <span className={cn("w-5 h-5", isActive && "drop-shadow-sm")}>{item.icon}</span>
                               <span>{item.title}</span>
                             </Link>
                           </SidebarMenuButton>
                         </TooltipTrigger>
-                        <TooltipContent side="right">
+                        <TooltipContent side="right" className="bg-gray-900 text-white border-gray-700">
                           {item.title}
                         </TooltipContent>
                       </Tooltip>
@@ -261,7 +261,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
           {/* Service & Payment */}
           <SidebarGroup>
-            <SidebarGroupLabel className="text-xs font-semibold text-gray-700 uppercase tracking-wider">
+            <SidebarGroupLabel className="text-[11px] font-bold text-gray-500 uppercase tracking-widest px-4 py-2">
               Dịch Vụ & Thanh Toán
             </SidebarGroupLabel>
             <SidebarGroupContent>
@@ -275,19 +275,19 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                           <SidebarMenuButton
                             asChild
                             className={cn(
-                              "transition-colors",
+                              "transition-all duration-200 h-11 text-sm font-medium",
                               isActive
-                                ? "bg-primary-100 text-primary-600 border-l-4 border-primary-600 hover:bg-primary-100"
-                                : "hover:bg-primary-100 hover:text-primary-600 text-gray-700"
+                                ? "bg-gradient-to-r from-primary-600 to-primary-500 text-white border-l-4 border-primary-700 hover:from-primary-700 hover:to-primary-600 shadow-md"
+                                : "hover:bg-primary-50 hover:text-primary-700 text-gray-700 hover:border-l-4 hover:border-primary-300"
                             )}
                           >
-                            <Link href={item.url}>
-                              {item.icon}
+                            <Link href={item.url} className="flex items-center gap-3">
+                              <span className={cn("w-5 h-5", isActive && "drop-shadow-sm")}>{item.icon}</span>
                               <span>{item.title}</span>
                             </Link>
                           </SidebarMenuButton>
                         </TooltipTrigger>
-                        <TooltipContent side="right">
+                        <TooltipContent side="right" className="bg-gray-900 text-white border-gray-700">
                           {item.title}
                         </TooltipContent>
                       </Tooltip>
@@ -300,7 +300,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
           {/* Admin */}
           <SidebarGroup>
-            <SidebarGroupLabel className="text-xs font-semibold text-gray-700 uppercase tracking-wider">
+            <SidebarGroupLabel className="text-[11px] font-bold text-gray-500 uppercase tracking-widest px-4 py-2">
               Quản Trị
             </SidebarGroupLabel>
             <SidebarGroupContent>
@@ -314,19 +314,19 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                           <SidebarMenuButton
                             asChild
                             className={cn(
-                              "transition-colors",
+                              "transition-all duration-200 h-11 text-sm font-medium",
                               isActive
-                                ? "bg-primary-100 text-primary-600 border-l-4 border-primary-600 hover:bg-primary-100"
-                                : "hover:bg-primary-100 hover:text-primary-600 text-gray-700"
+                                ? "bg-gradient-to-r from-primary-600 to-primary-500 text-white border-l-4 border-primary-700 hover:from-primary-700 hover:to-primary-600 shadow-md"
+                                : "hover:bg-primary-50 hover:text-primary-700 text-gray-700 hover:border-l-4 hover:border-primary-300"
                             )}
                           >
-                            <Link href={item.url}>
-                              {item.icon}
+                            <Link href={item.url} className="flex items-center gap-3">
+                              <span className={cn("w-5 h-5", isActive && "drop-shadow-sm")}>{item.icon}</span>
                               <span>{item.title}</span>
                             </Link>
                           </SidebarMenuButton>
                         </TooltipTrigger>
-                        <TooltipContent side="right">
+                        <TooltipContent side="right" className="bg-gray-900 text-white border-gray-700">
                           {item.title}
                         </TooltipContent>
                       </Tooltip>
@@ -339,7 +339,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
           {/* Operational Management */}
           <SidebarGroup>
-            <SidebarGroupLabel className="text-xs font-semibold text-gray-700 uppercase tracking-wider">
+            <SidebarGroupLabel className="text-[11px] font-bold text-gray-500 uppercase tracking-widest px-4 py-2">
               Vận hành
             </SidebarGroupLabel>
             <SidebarGroupContent>
@@ -353,19 +353,19 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                           <SidebarMenuButton
                             asChild
                             className={cn(
-                              "transition-colors",
+                              "transition-all duration-200 h-11 text-sm font-medium",
                               isActive
-                                ? "bg-primary-100 text-primary-600 border-l-4 border-primary-600 hover:bg-primary-100"
-                                : "hover:bg-primary-100 hover:text-primary-600 text-gray-700"
+                                ? "bg-gradient-to-r from-primary-600 to-primary-500 text-white border-l-4 border-primary-700 hover:from-primary-700 hover:to-primary-600 shadow-md"
+                                : "hover:bg-primary-50 hover:text-primary-700 text-gray-700 hover:border-l-4 hover:border-primary-300"
                             )}
                           >
-                            <Link href={item.url}>
-                              {item.icon}
+                            <Link href={item.url} className="flex items-center gap-3">
+                              <span className={cn("w-5 h-5", isActive && "drop-shadow-sm")}>{item.icon}</span>
                               <span>{item.title}</span>
                             </Link>
                           </SidebarMenuButton>
                         </TooltipTrigger>
-                        <TooltipContent side="right">
+                        <TooltipContent side="right" className="bg-gray-900 text-white border-gray-700">
                           {item.title}
                         </TooltipContent>
                       </Tooltip>
@@ -377,22 +377,24 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </SidebarGroup>
         </SidebarContent>
 
-        <SidebarFooter className="border-t border-gray-200 bg-white">
+        <SidebarFooter className="border-t border-primary-100 bg-gradient-to-br from-error-50/50 via-white to-white">
           <SidebarMenu>
             <SidebarMenuItem>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <SidebarMenuButton
                     asChild
-                    className="hover:bg-error-100 hover:text-error-600 transition-colors"
+                    className="h-11 hover:bg-error-50 hover:text-error-600 transition-all duration-200 text-gray-700 font-medium hover:border-l-4 hover:border-error-400"
                   >
-                    <Link href="/logout">
-                      {ICONS.LOGOUT}
+                    <Link href="/logout" className="flex items-center gap-3">
+                      <span className="w-5 h-5">{ICONS.LOGOUT}</span>
                       <span>Đăng Xuất</span>
                     </Link>
                   </SidebarMenuButton>
                 </TooltipTrigger>
-                <TooltipContent side="right">Đăng Xuất</TooltipContent>
+                <TooltipContent side="right" className="bg-gray-900 text-white border-gray-700">
+                  Đăng Xuất
+                </TooltipContent>
               </Tooltip>
             </SidebarMenuItem>
           </SidebarMenu>
