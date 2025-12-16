@@ -26,7 +26,7 @@ export function CheckOutResultsTable({
     return (
       <div className="rounded-xl border-2 border-gray-200 bg-white p-12 text-center shadow-sm">
         <div className="flex flex-col items-center gap-4">
-          <div className="text-gray-300 scale-150">{ICONS.SEARCH}</div>
+          <div className="w-16 h-16 text-gray-300">{ICONS.SEARCH}</div>
           <div>
             <p className="text-base font-medium text-gray-600">
               Không tìm thấy phòng đang thuê nào
@@ -137,7 +137,7 @@ export function CheckOutResultsTable({
                   size="sm"
                   className="h-9 px-4 bg-linear-to-r from-primary-600 to-primary-500 hover:from-primary-500 hover:to-primary-600 text-white font-semibold shadow-md hover:shadow-lg transition-all"
                 >
-                  {ICONS.DOOR_OPEN}
+                  <span className="w-4 h-4 mr-2">{ICONS.DOOR_OPEN}</span>
                   <span className="ml-1.5">Check-out</span>
                 </Button>
               </TableCell>

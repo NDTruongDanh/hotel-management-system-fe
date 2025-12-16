@@ -1,6 +1,5 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import { StaffGrid } from "./staff-grid";
 import { StaffFilters } from "./staff-filters";
 import { Employee } from "@/lib/types/employee";
@@ -17,7 +16,6 @@ interface EmployeesTabProps {
   onStatusChange: (value: string) => void;
   onAccountChange: (value: string) => void;
   onClearFilters: () => void;
-  onAddEmployee: () => void;
   onEdit: (employee: Employee) => void;
   onCreateAccount: (employee: Employee) => void;
   onDeactivate: (employeeId: string) => void;
@@ -35,7 +33,6 @@ export function EmployeesTab({
   onStatusChange,
   onAccountChange,
   onClearFilters,
-  onAddEmployee,
   onEdit,
   onCreateAccount,
   onDeactivate,
@@ -68,7 +65,7 @@ export function EmployeesTab({
         <div className="flex items-center justify-center py-12 bg-gray-50 rounded-xl">
           <div className="text-center">
             <div className="w-10 h-10 mx-auto mb-3 animate-spin text-primary-500">
-              {ICONS.LOADER}
+              <span className="w-5 h-5 animate-spin">{ICONS.LOADER}</span>
             </div>
             <p className="text-gray-500">Đang tải dữ liệu...</p>
           </div>

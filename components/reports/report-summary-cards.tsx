@@ -70,7 +70,7 @@ export function ReportSummaryCards({
             <p className="text-sm font-semibold text-gray-600 mb-2">
               {card.title}
             </p>
-            <p className="text-2xl font-extrabold text-gray-900 break-words">
+            <p className="text-2xl font-extrabold text-gray-900">
               {card.value}
             </p>
           </div>

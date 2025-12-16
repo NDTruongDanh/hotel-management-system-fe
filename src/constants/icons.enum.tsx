@@ -8,6 +8,7 @@ import {
   LayoutDashboard,
   DoorOpen,
   Calendar,
+  CalendarPlus,
   CreditCard,
   Users,
   Settings,
@@ -64,10 +65,12 @@ import {
   UserX,
   Loader2,
   ArrowUpDown,
+  ArrowRightLeft,
   Star,
   Percent,
   Play,
   History,
+  Split,
 } from "lucide-react";
 
 export const ICONS = {
@@ -138,6 +141,7 @@ export const ICONS = {
   ALERT_CIRCLE: <AlertCircle />,
   LOADER: <Loader2 />,
   ARROW_UP_DOWN: <ArrowUpDown />,
+  ARROW_RIGHT_LEFT: <ArrowRightLeft />,
   FOLDER: <Folder />,
   PERCENT: <Percent />,
   STAR: <Star />,
@@ -145,4 +149,6 @@ export const ICONS = {
   HISTORY: <History />,
   ALERT_TRIANGLE: <AlertTriangle />,
   SPARKLES: <Sparkles />,
+  SPLIT: <Split />,
+  CALENDAR_PLUS: <CalendarPlus />,
 };

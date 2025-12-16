@@ -132,12 +132,12 @@ export function ServiceRevenueReport({
                       </span>
                       <span className="text-gray-500 text-xs">({item.category})</span>
                       {isTop && (
-                        <span className="px-2 py-0.5 bg-success-100 text-success-700 text-xs font-bold rounded-full flex-shrink-0">
+                        <span className="px-2 py-0.5 bg-success-100 text-success-700 text-xs font-bold rounded-full shrink-0">
                           TOP 1
                         </span>
                       )}
                     </div>
-                    <span className="font-bold text-gray-900 flex-shrink-0 ml-2">
+                    <span className="font-bold text-gray-900 shrink-0 ml-2">
                       {new Intl.NumberFormat("vi-VN").format(item.revenue)} ₫
                     </span>
                   </div>

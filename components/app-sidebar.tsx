@@ -79,6 +79,11 @@ const serviceManagement = [
     icon: ICONS.PENALTY,
   },
   {
+    title: "Folio",
+    url: "/folio",
+    icon: ICONS.FILE_TEXT,
+  },
+  {
     title: "Thanh Toán",
     url: "/payments",
     icon: ICONS.RECEIPT,
@@ -90,6 +95,11 @@ const adminManagement = [
     title: "Khách hàng",
     url: "/customers",
     icon: ICONS.USER,
+  },
+  {
+    title: "Khách Lưu Trú",
+    url: "/nguoio",
+    icon: ICONS.USERS,
   },
   {
     title: "Nhân Viên",
@@ -108,6 +118,11 @@ const operationalManagement = [
     title: "Housekeeping",
     url: "/housekeeping",
     icon: ICONS.CLIPBOARD_LIST,
+  },
+  {
+    title: "Chuyển Phòng",
+    url: "/room-move",
+    icon: ICONS.DOOR_OPEN,
   },
   {
     title: "Quản lý Ca",

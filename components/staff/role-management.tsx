@@ -187,7 +187,7 @@ export function RoleManagement({
                           >
                             <TableCell className="sticky left-0 bg-white hover:bg-gray-50 z-10 py-4">
                               <div className="flex items-start gap-3">
-                                <div className="w-6 h-6 mt-0.5 bg-gray-100 rounded-lg flex items-center justify-center text-gray-500 text-xs font-semibold flex-shrink-0">
+                                <div className="w-6 h-6 mt-0.5 bg-gray-100 rounded-lg flex items-center justify-center text-gray-500 text-xs font-semibold shrink-0">
                                   {permIndex + 1}
                                 </div>
                                 <div>

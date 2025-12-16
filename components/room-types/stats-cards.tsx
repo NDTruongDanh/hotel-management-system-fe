@@ -38,7 +38,7 @@ export function StatsCards({
                   {totalRoomTypes}
                 </p>
               </div>
-              <div className="w-12 h-12 md:w-14 md:h-14 flex-shrink-0 bg-linear-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center shadow-lg">
+              <div className="w-12 h-12 md:w-14 md:h-14 shrink-0 bg-linear-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center shadow-lg">
                 <span className="w-6 h-6 text-white inline-flex items-center justify-center">
                   {ICONS.BED_DOUBLE}
                 </span>
@@ -60,7 +60,7 @@ export function StatsCards({
                   {minPrice !== null ? formatCurrency(minPrice) : "0 ₫"}
                 </p>
               </div>
-              <div className="w-12 h-12 md:w-14 md:h-14 flex-shrink-0 bg-linear-to-br from-success-400 to-success-600 rounded-xl flex items-center justify-center shadow-lg">
+              <div className="w-12 h-12 md:w-14 md:h-14 shrink-0 bg-linear-to-br from-success-400 to-success-600 rounded-xl flex items-center justify-center shadow-lg">
                 <span className="w-6 h-6 text-white inline-flex items-center justify-center">
                   {ICONS.DOLLAR_SIGN}
                 </span>
@@ -82,7 +82,7 @@ export function StatsCards({
                   {maxPrice !== null ? formatCurrency(maxPrice) : "0 ₫"}
                 </p>
               </div>
-              <div className="w-12 h-12 md:w-14 md:h-14 flex-shrink-0 bg-linear-to-br from-warning-400 to-warning-600 rounded-xl flex items-center justify-center shadow-lg">
+              <div className="w-12 h-12 md:w-14 md:h-14 shrink-0 bg-linear-to-br from-warning-400 to-warning-600 rounded-xl flex items-center justify-center shadow-lg">
                 <span className="w-6 h-6 text-white inline-flex items-center justify-center">
                   {ICONS.TRENDING_UP}
                 </span>
@@ -104,7 +104,7 @@ export function StatsCards({
                   {avgPrice !== null ? formatCurrency(avgPrice) : "0 ₫"}
                 </p>
               </div>
-              <div className="w-12 h-12 md:w-14 md:h-14 flex-shrink-0 bg-linear-to-br from-primary-400 to-primary-600 rounded-xl flex items-center justify-center shadow-lg">
+              <div className="w-12 h-12 md:w-14 md:h-14 shrink-0 bg-linear-to-br from-primary-400 to-primary-600 rounded-xl flex items-center justify-center shadow-lg">
                 <span className="w-6 h-6 text-white inline-flex items-center justify-center">
                   {ICONS.BAR_CHART}
                 </span>
@@ -130,7 +130,7 @@ export function StatsCards({
                   <p className="text-xl font-extrabold text-gray-900">-</p>
                 )}
               </div>
-              <div className="w-12 h-12 md:w-14 md:h-14 flex-shrink-0 bg-linear-to-br from-purple-400 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+              <div className="w-12 h-12 md:w-14 md:h-14 shrink-0 bg-linear-to-br from-purple-400 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
                 <span className="w-6 h-6 text-white inline-flex items-center justify-center">
                   {ICONS.TRENDING_UP}
                 </span>

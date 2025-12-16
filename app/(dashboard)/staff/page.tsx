@@ -86,7 +86,6 @@ export default function StaffPage() {
             onStatusChange={(value) => updateFilter("statusFilter", value)}
             onAccountChange={(value) => updateFilter("accountFilter", value)}
             onClearFilters={clearFilters}
-            onAddEmployee={handleAddEmployee}
             onEdit={handleEditEmployee}
             onCreateAccount={handleCreateAccount}
             onDeactivate={handleDeactivate}

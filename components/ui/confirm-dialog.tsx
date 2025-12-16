@@ -10,6 +10,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { ICONS } from "@/src/constants/icons.enum";
 
 interface ConfirmDialogProps {
@@ -80,11 +81,11 @@ export function ConfirmDialog({
           <Button
             type="button"
             onClick={handleConfirm}
-            className={
+            className={cn(
               variant === "destructive"
-                ? "h-11 px-6 bg-gradient-to-r from-error-600 to-error-500 hover:from-error-700 hover:to-error-600 text-white font-semibold shadow-md"
-                : "h-11 px-6 bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-700 hover:to-primary-600 text-white font-semibold shadow-md"
-            }
+                ? "h-11 px-6 bg-linear-to-r from-error-600 to-error-500 hover:from-error-700 hover:to-error-600 text-white font-semibold shadow-md"
+                : "h-11 px-6 bg-linear-to-r from-primary-600 to-primary-500 hover:from-primary-700 hover:to-primary-600 text-white font-semibold shadow-md"
+            )}
           >
             <span className="w-4 h-4 mr-2">{ICONS.CHECK}</span>
             {confirmText}

@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { ICONS } from "@/src/constants/icons.enum";
 import type { CheckoutSummary } from "@/lib/types/checkin-checkout";
 import { cn } from "@/lib/utils";
+import { ExtendStayModal } from "./extend-stay-modal";
 
 interface CheckOutDetailsProps {
   summary: CheckoutSummary;
@@ -36,6 +37,7 @@ export function CheckOutDetails({
   onBack,
 }: CheckOutDetailsProps) {
   const [currentStep, setCurrentStep] = useState<CheckoutStep>(1);
+  const [extendStayModalOpen, setExtendStayModalOpen] = useState(false);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("vi-VN").format(amount) + " ₫";
@@ -211,13 +213,23 @@ export function CheckOutDetails({
 
           <Card className="border-2 border-primary-200 shadow-lg rounded-2xl overflow-hidden bg-linear-to-br from-primary-50 to-white">
             <CardHeader className="bg-linear-to-r from-primary-100 to-primary-50 border-b-2 border-primary-200">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-linear-to-br from-primary-600 to-primary-500 rounded-xl flex items-center justify-center">
-                  <span className="w-5 h-5 text-white">{ICONS.HOME}</span>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-linear-to-br from-primary-600 to-primary-500 rounded-xl flex items-center justify-center">
+                    <span className="w-5 h-5 text-white">{ICONS.HOME}</span>
+                  </div>
+                  <CardTitle className="text-xl font-extrabold text-gray-900">
+                    Tiền phòng
+                  </CardTitle>
                 </div>
-                <CardTitle className="text-xl font-extrabold text-gray-900">
-                  Tiền phòng
-                </CardTitle>
+                <Button
+                  onClick={() => setExtendStayModalOpen(true)}
+                  variant="outline"
+                  className="h-10 bg-warning-50 border-warning-300 hover:bg-warning-100 text-warning-700 font-semibold"
+                >
+                  {ICONS.CALENDAR_PLUS}
+                  <span className="ml-2">Gia hạn lưu trú</span>
+                </Button>
               </div>
             </CardHeader>
             <CardContent className="p-8">
@@ -533,6 +545,19 @@ export function CheckOutDetails({
           </div>
         </div>
       )}
+
+      {/* Extend Stay Modal */}
+      <ExtendStayModal
+        open={extendStayModalOpen}
+        onOpenChange={setExtendStayModalOpen}
+        onConfirm={(additionalNights, newCheckOutDate) => {
+          console.log("Extend stay:", { additionalNights, newCheckOutDate });
+          // TODO: Update booking and recalculate totals
+        }}
+        roomNumber={summary.receipt.roomName}
+        currentCheckOutDate={summary.receipt.checkOutDate}
+        nightlyRate={summary.receipt.pricePerNight}
+      />
     </div>
   );
 }

@@ -26,7 +26,7 @@ export function CheckInResultsTable({
     return (
       <div className="rounded-xl border-2 border-gray-200 bg-white p-12 text-center shadow-sm">
         <div className="flex flex-col items-center gap-4">
-          <div className="text-gray-300 scale-150">{ICONS.SEARCH}</div>
+          <div className="w-16 h-16 text-gray-300">{ICONS.SEARCH}</div>
           <div>
             <p className="text-base font-medium text-gray-600">
               Không tìm thấy đặt phòng nào

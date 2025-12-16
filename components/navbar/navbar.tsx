@@ -29,13 +29,13 @@ export function Navbar() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 flex h-16 items-center gap-4 border-b border-primary-100 bg-gradient-to-r from-white via-primary-50/30 to-white px-4 shadow-sm backdrop-blur-sm">
+      <header className="sticky top-0 z-50 flex h-16 items-center gap-4 border-b border-primary-100 bg-linear-to-r from-white via-primary-50/30 to-white px-4 shadow-sm backdrop-blur-sm">
         <SidebarTrigger className="h-10 w-10 hover:bg-primary-100 transition-all duration-200 rounded-lg" />
 
         <div className="flex flex-1 items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="h-8 w-1 bg-gradient-to-b from-primary-600 to-primary-400 rounded-full" />
-            <h1 className="text-lg font-bold text-gray-900 bg-gradient-to-r from-primary-600 to-primary-500 bg-clip-text text-transparent">
+            <div className="h-8 w-1 bg-linear-to-b from-primary-600 to-primary-400 rounded-full" />
+            <h1 className="text-lg font-bold bg-linear-to-r from-primary-600 to-primary-500 bg-clip-text text-transparent">
               Hệ Thống Quản Lý Khách Sạn
             </h1>
           </div>
@@ -53,7 +53,7 @@ export function Navbar() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button className="flex h-10 items-center gap-2 rounded-lg border border-primary-200 bg-white px-3 hover:bg-primary-50 hover:border-primary-300 cursor-pointer transition-all duration-200 shadow-sm hover:shadow-md">
-                  <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary-600 to-primary-500 text-white shadow-sm">
+                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-primary-600 to-primary-500 text-white shadow-sm">
                     <span className="inline-flex items-center justify-center w-4 h-4">{ICONS.USER}</span>
                   </div>
                   <div className="hidden sm:flex flex-col items-start">
@@ -136,8 +136,8 @@ export function Navbar() {
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <div className="flex items-center gap-4 p-4 rounded-lg bg-gradient-to-br from-primary-50 to-primary-100/30 border border-primary-200">
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-primary-600 to-primary-500 text-white shadow-lg">
+            <div className="flex items-center gap-4 p-4 rounded-lg bg-linear-to-br from-primary-50 to-primary-100/30 border border-primary-200">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-linear-to-br from-primary-600 to-primary-500 text-white shadow-lg">
                 <span className="w-8 h-8">{ICONS.USER}</span>
               </div>
               <div className="flex-1">

@@ -110,7 +110,7 @@ export function PricingPolicyFormModal({
         <DialogHeader>
           <DialogTitle className="text-2xl font-extrabold text-gray-900 flex items-center gap-3">
             <span className="w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center">
-              <span className="text-primary-600">{ICONS.DOLLAR_SIGN}</span>
+              <span className="w-5 h-5 text-primary-600">{ICONS.DOLLAR_SIGN}</span>
             </span>
             {policy ? "Chỉnh sửa chính sách giá" : "Thêm chính sách giá mới"}
           </DialogTitle>
@@ -348,7 +348,7 @@ export function PricingPolicyFormModal({
               type="submit"
               className="h-12 px-8 bg-linear-to-r from-primary-600 to-primary-500 hover:from-primary-500 hover:to-primary-600 font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all"
             >
-              <span className="mr-2">{ICONS.CHECK}</span>
+              <span className="w-4 h-4 mr-2">{ICONS.CHECK}</span>
               {policy ? "Cập nhật" : "Tạo chính sách"}
             </Button>
           </DialogFooter>
