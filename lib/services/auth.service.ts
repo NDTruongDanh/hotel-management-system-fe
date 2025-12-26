@@ -5,15 +5,18 @@
 
 import { logger } from "@/lib/utils/logger";
 import type {
-  LoginRequest,
-  LoginResponse,
+  ApiResponse,
+  EmployeeLoginRequest,
+  EmployeeAuthResponse,
   LogoutRequest,
   RefreshTokensRequest,
   RefreshTokensResponse,
   ChangePasswordRequest,
   Employee,
-  AuthTokens,
-} from "@/lib/types/auth";
+  ForgotPasswordRequest,
+  ForgotPasswordResponse,
+  ResetPasswordRequest,
+} from "@/lib/types/api";
 import {
   api,
   setTokens,
@@ -28,30 +31,41 @@ import {
 
 export const authService = {
   /**
-   * Login with email and password
-   * POST /auth/login
+   * Login with username and password (Employee)
+   * POST /employee/auth/login
    */
-  async login(email: string, password: string): Promise<LoginResponse> {
-    const payload: LoginRequest = { email, password };
-    const response = await api.post<LoginResponse>("/auth/login", payload);
+  async login(
+    username: string,
+    password: string
+  ): Promise<EmployeeAuthResponse> {
+    const payload: EmployeeLoginRequest = { username, password };
+    const response = await api.post<ApiResponse<EmployeeAuthResponse>>(
+      "/employee/auth/login",
+      payload
+    );
+
+    const authData = response.data;
 
     // Store tokens and user data
-    if (response.tokens) {
-      setTokens(response.tokens.access.token, response.tokens.refresh.token);
+    if (authData.tokens) {
+      setTokens(
+        authData.tokens.access.token,
+        authData.tokens.refresh.token
+      );
     }
-    if (response.user && typeof window !== "undefined") {
+    if (authData.employee && typeof window !== "undefined") {
       localStorage.setItem(
         AUTH_STORAGE_KEYS.USER,
-        JSON.stringify(response.user)
+        JSON.stringify(authData.employee)
       );
     }
 
-    return response;
+    return authData;
   },
 
   /**
-   * Logout user
-   * POST /auth/logout
+   * Logout user (Employee)
+   * POST /employee/auth/logout
    */
   async logout(): Promise<void> {
     const refreshToken = getRefreshToken();
@@ -59,7 +73,7 @@ export const authService = {
     if (refreshToken) {
       try {
         const payload: LogoutRequest = { refreshToken };
-        await api.post("/auth/logout", payload, { requiresAuth: true });
+        await api.post("/employee/auth/logout", payload);
       } catch (error) {
         // Even if logout API fails, still clear local tokens
         logger.warn("Logout API call failed:", error);
@@ -71,10 +85,10 @@ export const authService = {
   },
 
   /**
-   * Refresh access token using refresh token
-   * POST /auth/refresh-tokens
+   * Refresh access token using refresh token (Employee)
+   * POST /employee/auth/refresh-tokens
    */
-  async refreshTokens(): Promise<AuthTokens | null> {
+  async refreshTokens(): Promise<RefreshTokensResponse | null> {
     const refreshToken = getRefreshToken();
 
     if (!refreshToken) {
@@ -83,18 +97,20 @@ export const authService = {
 
     try {
       const payload: RefreshTokensRequest = { refreshToken };
-      const response = await api.post<RefreshTokensResponse>(
-        "/auth/refresh-tokens",
+      const response = await api.post<ApiResponse<RefreshTokensResponse>>(
+        "/employee/auth/refresh-tokens",
         payload
       );
 
-      // Update stored tokens
-      setTokens(response.access.token, response.refresh.token);
+      const tokenData = response.data;
 
-      return {
-        access: response.access,
-        refresh: response.refresh,
-      };
+      // Update stored tokens
+      setTokens(
+        tokenData.tokens.access.token,
+        tokenData.tokens.refresh.token
+      );
+
+      return tokenData;
     } catch (error) {
       // If refresh fails, clear all tokens
       clearTokens();
@@ -103,23 +119,67 @@ export const authService = {
   },
 
   /**
-   * Change user password
-   * POST /auth/change-password
+   * Change employee password
+   * POST /employee/profile/change-password
    */
   async changePassword(
     currentPassword: string,
     newPassword: string
   ): Promise<void> {
     const payload: ChangePasswordRequest = { currentPassword, newPassword };
-    await api.post("/auth/change-password", payload, { requiresAuth: true });
+    await api.post("/employee/profile/change-password", payload, {
+      requiresAuth: true,
+    });
   },
 
   /**
-   * Get current user profile
-   * GET /auth/me
+   * Get current employee profile
+   * GET /employee/profile
    */
   async getCurrentUser(): Promise<Employee> {
-    return api.get<Employee>("/auth/me", { requiresAuth: true });
+    const response = await api.get<ApiResponse<Employee>>(
+      "/employee/profile",
+      { requiresAuth: true }
+    );
+    return response.data;
+  },
+
+  /**
+   * Update employee profile
+   * PATCH /employee/profile
+   */
+  async updateProfile(data: { name?: string }): Promise<Employee> {
+    const response = await api.patch<ApiResponse<Employee>>(
+      "/employee/profile",
+      data,
+      { requiresAuth: true }
+    );
+    return response.data;
+  },
+
+  /**
+   * Forgot password (Employee)
+   * POST /employee/auth/forgot-password
+   */
+  async forgotPassword(username: string): Promise<ForgotPasswordResponse> {
+    const payload: ForgotPasswordRequest = { username };
+    const response = await api.post<ApiResponse<ForgotPasswordResponse>>(
+      "/employee/auth/forgot-password",
+      payload
+    );
+    return response.data;
+  },
+
+  /**
+   * Reset password (Employee)
+   * POST /employee/auth/reset-password?token={token}
+   */
+  async resetPassword(token: string, password: string): Promise<void> {
+    const payload: ResetPasswordRequest = { password };
+    await api.post(
+      `/employee/auth/reset-password?token=${encodeURIComponent(token)}`,
+      payload
+    );
   },
 
   /**
