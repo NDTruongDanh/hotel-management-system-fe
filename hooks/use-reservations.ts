@@ -73,28 +73,40 @@ export function useReservations() {
     return convertReservationsToEvents(filteredReservations);
   }, [filteredReservations]);
 
-  // Handle search for available rooms
-  const handleSearch = () => {
-    if (!checkInDate || !checkOutDate) {
+  // Handle search for available rooms (Find tab)
+  const handleSearch = (findCheckInDate: string, findCheckOutDate: string, findRoomType: string) => {
+    if (!findCheckInDate || !findCheckOutDate) {
       alert("Vui lòng chọn ngày đến và ngày đi!");
       return;
     }
 
     logger.log("Searching for available rooms...", {
-      checkInDate,
-      checkOutDate,
-      roomTypeFilter,
+      checkInDate: findCheckInDate,
+      checkOutDate: findCheckOutDate,
+      roomTypeFilter: findRoomType,
     });
 
     // Search available rooms
     const rooms = searchAvailableRooms(
-      checkInDate,
-      checkOutDate,
-      roomTypeFilter !== "Tất cả" ? roomTypeFilter : undefined
+      findCheckInDate,
+      findCheckOutDate,
+      findRoomType !== "Tất cả" ? findRoomType : undefined
     );
 
     setAvailableRooms(rooms);
     setIsAvailableRoomsModalOpen(true);
+  };
+
+  // Handle filter for calendar/list (Filter tab) - doesn't open modal
+  const handleFilterBookings = () => {
+    // Filter state is already set by onCheckInChange, onCheckOutChange, etc.
+    // The calendar and list will automatically update via filteredReservations
+    logger.log("Filtering bookings...", {
+      checkInDate,
+      checkOutDate,
+      roomTypeFilter,
+      statusFilter,
+    });
   };
 
   // Handle reset filters
@@ -312,6 +324,7 @@ export function useReservations() {
     setRoomTypeFilter,
     setStatusFilter,
     handleSearch,
+    handleFilterBookings,
     handleReset,
     handleCreateNew,
     handleEdit,

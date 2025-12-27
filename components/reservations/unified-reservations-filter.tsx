@@ -18,6 +18,7 @@ import { RoomType } from "@/lib/types/room";
 import { ReservationStatus } from "@/lib/types/reservation";
 
 interface UnifiedReservationsFilterProps {
+  // Filter state (for calendar/list below)
   checkInDate: string;
   checkOutDate: string;
   roomTypeFilter: string;
@@ -27,8 +28,10 @@ interface UnifiedReservationsFilterProps {
   onCheckOutChange: (date: string) => void;
   onRoomTypeChange: (roomType: string) => void;
   onStatusChange: (status: ReservationStatus | "Tất cả") => void;
-  onSearch: () => void;
+  onFilterBookings: () => void;  // Filter calendar/list (doesn't open modal)
   onReset: () => void;
+  // Find rooms handler (separate)
+  onFindRoomsSearch: (checkInDate: string, checkOutDate: string, roomType: string) => void;
 }
 
 export function UnifiedReservationsFilter({
@@ -41,10 +44,30 @@ export function UnifiedReservationsFilter({
   onCheckOutChange,
   onRoomTypeChange,
   onStatusChange,
-  onSearch,
+  onFilterBookings,
   onReset,
+  onFindRoomsSearch,
 }: UnifiedReservationsFilterProps) {
   const [activeTab, setActiveTab] = useState<"find" | "filter">("find");
+  
+  // Local state for Find tab (independent from filter state)
+  const [findCheckInDate, setFindCheckInDate] = useState("");
+  const [findCheckOutDate, setFindCheckOutDate] = useState("");
+  const [findRoomTypeFilter, setFindRoomTypeFilter] = useState("Tất cả");
+
+  const handleFindSearch = () => {
+    if (!findCheckInDate || !findCheckOutDate) {
+      alert("Vui lòng chọn ngày đến và ngày đi!");
+      return;
+    }
+    onFindRoomsSearch(findCheckInDate, findCheckOutDate, findRoomTypeFilter);
+  };
+
+  const handleFindReset = () => {
+    setFindCheckInDate("");
+    setFindCheckOutDate("");
+    setFindRoomTypeFilter("Tất cả");
+  };
 
   return (
     <Card className="bg-white border-2 border-gray-200 shadow-lg">
@@ -90,8 +113,8 @@ export function UnifiedReservationsFilter({
                   </Label>
                   <Input
                     type="date"
-                    value={checkInDate}
-                    onChange={(e) => onCheckInChange(e.target.value)}
+                    value={findCheckInDate}
+                    onChange={(e) => setFindCheckInDate(e.target.value)}
                     className="h-10 border-2 border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500"
                   />
                 </div>
@@ -103,8 +126,8 @@ export function UnifiedReservationsFilter({
                   </Label>
                   <Input
                     type="date"
-                    value={checkOutDate}
-                    onChange={(e) => onCheckOutChange(e.target.value)}
+                    value={findCheckOutDate}
+                    onChange={(e) => setFindCheckOutDate(e.target.value)}
                     className="h-10 border-2 border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500"
                   />
                 </div>
@@ -114,7 +137,7 @@ export function UnifiedReservationsFilter({
                   <Label className="font-bold text-gray-900">
                     Loại Phòng <span className="text-red-500">*</span>
                   </Label>
-                  <Select value={roomTypeFilter} onValueChange={onRoomTypeChange}>
+                  <Select value={findRoomTypeFilter} onValueChange={setFindRoomTypeFilter}>
                     <SelectTrigger className="h-10 border-2 border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500">
                       <SelectValue placeholder="Chọn loại phòng" />
                     </SelectTrigger>
@@ -133,14 +156,14 @@ export function UnifiedReservationsFilter({
               {/* Find Button with Green Styling */}
               <div className="flex gap-3 pt-2">
                 <Button
-                  onClick={onSearch}
+                  onClick={handleFindSearch}
                   className="flex-1 h-11 bg-linear-to-r from-success-500 to-success-600 text-white font-bold hover:from-success-600 hover:to-success-700 transition-all shadow-md hover:shadow-lg rounded-md"
                 >
                   <span className="w-5 h-5 mr-2">{ICONS.SEARCH}</span>
                   Tìm Phòng Trống
                 </Button>
                 <Button
-                  onClick={onReset}
+                  onClick={handleFindReset}
                   variant="outline"
                   className="h-11 px-6 border-2 border-gray-300 font-bold hover:bg-gray-100 rounded-md"
                 >
@@ -223,7 +246,7 @@ export function UnifiedReservationsFilter({
               {/* Filter Buttons */}
               <div className="flex gap-3 pt-2">
                 <Button
-                  onClick={onSearch}
+                  onClick={onFilterBookings}
                   className="flex-1 h-11 bg-primary-600 text-white font-bold hover:bg-primary-700 transition-colors rounded-md shadow-md hover:shadow-lg"
                 >
                   <span className="w-5 h-5 mr-2">{ICONS.SEARCH}</span>

@@ -50,9 +50,15 @@ export default function ReservationsPage() {
     handleCloseAvailableRoomsModal,
     handleSelectRoom,
     handleConfirmRoomSelection,
-    handleClearRoomSelection,
     handleCloseRoomSelectionModal,
   } = useReservations();
+
+  // Handler for Find Available Rooms (calls handleSearch from hook with date parameters)
+  const handleFindRoomsSearch = (findCheckInDate: string, findCheckOutDate: string, findRoomType: string) => {
+    // Call handleSearch which is already from useReservations hook
+    // It validates dates and opens AvailableRoomsModal
+    handleSearch(findCheckInDate, findCheckOutDate, findRoomType);
+  };
 
   // Calculate stats
   const stats = useMemo(() => {
@@ -186,8 +192,9 @@ export default function ReservationsPage() {
         onCheckOutChange={setCheckOutDate}
         onRoomTypeChange={setRoomTypeFilter}
         onStatusChange={setStatusFilter}
-        onSearch={handleSearch}
+        onFilterBookings={() => {}} // Filter happens automatically via filteredReservations
         onReset={handleReset}
+        onFindRoomsSearch={handleFindRoomsSearch}
       />
 
       {/* Tabs for View Mode */}
