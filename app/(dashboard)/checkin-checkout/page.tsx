@@ -98,7 +98,7 @@ export default function CheckinCheckoutPage() {
       {/* Success Message */}
       {notification.message && (
         <Alert className="bg-success-100 border-2 border-success-600 shadow-md flex items-center gap-4">
-          <div className="text-success-600 flex-shrink-0">{ICONS.CHECK}</div>
+          <div className="text-success-600 shrink-0">{ICONS.CHECK}</div>
           <AlertDescription className="text-success-700 font-semibold">
             {notification.message}
           </AlertDescription>

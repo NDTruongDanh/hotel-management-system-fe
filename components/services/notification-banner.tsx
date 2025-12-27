@@ -21,7 +21,7 @@ export function NotificationBanner({
     >
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className={`w-6 h-6 flex-shrink-0 flex items-center justify-center ${
+          <div className={`w-6 h-6 shrink-0 flex items-center justify-center ${
             type === "success" ? "text-success-600" : "text-error-600"
           }`}>
             {type === "success" ? ICONS.CHECK : ICONS.ALERT}
@@ -30,7 +30,7 @@ export function NotificationBanner({
         </div>
         <button
           onClick={onDismiss}
-          className="text-current hover:opacity-70 flex-shrink-0"
+          className="text-current hover:opacity-70 shrink-0"
           aria-label="Đóng thông báo"
         >
           {ICONS.CLOSE}
