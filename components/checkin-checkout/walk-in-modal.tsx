@@ -19,14 +19,24 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
 import { ICONS } from "@/src/constants/icons.enum";
 import { mockRooms } from "@/lib/mock-rooms";
 import { mockRoomTypes } from "@/lib/mock-room-types";
+import { NguoioFormModal } from "@/components/nguoio/nguoio-form-modal";
 
 interface WalkInModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onConfirm: (data: WalkInFormData) => void;
+}
+
+// Room assignment for multiple rooms
+interface RoomAssignment {
+  roomID: string;
+  numberOfGuests: number;
+  checkInDate: string;
+  checkOutDate: string;
 }
 
 export interface WalkInFormData {
@@ -36,39 +46,50 @@ export interface WalkInFormData {
   identityCard: string;
   email?: string;
   address?: string;
-  // Room selection
-  roomID: string;
-  numberOfGuests: number;
-  checkInDate: string;
-  checkOutDate: string;
+  // Multiple room selections
+  roomAssignments: RoomAssignment[];
   // Payment
   depositAmount: number;
   notes?: string;
 }
 
 export function WalkInModal({ open, onOpenChange, onConfirm }: WalkInModalProps) {
-  const [formData, setFormData] = useState<WalkInFormData>({
+  // Customer info state
+  const [customerInfo, setCustomerInfo] = useState({
     customerName: "",
     phoneNumber: "",
     identityCard: "",
     email: "",
     address: "",
+  });
+
+  // Single room form for quick add
+  const [singleRoom, setSingleRoom] = useState({
     roomID: "",
     numberOfGuests: 1,
     checkInDate: new Date().toISOString().split("T")[0],
     checkOutDate: "",
-    depositAmount: 0,
-    notes: "",
   });
 
+  // Multiple rooms storage
+  const [roomAssignments, setRoomAssignments] = useState<RoomAssignment[]>([]);
+
+  const [depositAmount, setDepositAmount] = useState(0);
+  const [notes, setNotes] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [nguoioModalOpen, setNguoioModalOpen] = useState(false);
+  const [registeredGuests, setRegisteredGuests] = useState<any[]>([]);
 
-  // Get available rooms (status = "Sẵn sàng")
-  const availableRooms = mockRooms.filter((room) => room.roomStatus === "Sẵn sàng");
+  // Get available rooms (status = "Sẵn sàng") and not already selected
+  const getAvailableRooms = () => {
+    const selectedRoomIDs = roomAssignments.map((a) => a.roomID);
+    return mockRooms.filter(
+      (room) => room.roomStatus === "Sẵn sàng" && !selectedRoomIDs.includes(room.roomID)
+    );
+  };
 
-  const handleChange = (field: keyof WalkInFormData, value: string | number) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-    // Clear error for this field
+  const handleCustomerChange = (field: string, value: string) => {
+    setCustomerInfo((prev) => ({ ...prev, [field]: value }));
     if (errors[field]) {
       setErrors((prev) => {
         const newErrors = { ...prev };
@@ -78,41 +99,87 @@ export function WalkInModal({ open, onOpenChange, onConfirm }: WalkInModalProps)
     }
   };
 
-  const validateForm = (): boolean => {
-    const newErrors: Record<string, string> = {};
+  const handleRoomChange = (field: string, value: string | number) => {
+    setSingleRoom((prev) => ({ ...prev, [field]: value }));
+  };
 
-    if (!formData.customerName.trim()) {
-      newErrors.customerName = "Vui lòng nhập tên khách hàng";
+  const addRoom = () => {
+    const roomErrors: Record<string, string> = {};
+
+    if (!singleRoom.roomID) {
+      roomErrors.roomID = "Vui lòng chọn phòng";
     }
 
-    if (!formData.phoneNumber.trim()) {
-      newErrors.phoneNumber = "Vui lòng nhập số điện thoại";
-    } else if (!/^[0-9]{10}$/.test(formData.phoneNumber)) {
-      newErrors.phoneNumber = "Số điện thoại không hợp lệ (10 chữ số)";
+    if (!singleRoom.checkOutDate) {
+      roomErrors.checkOutDate = "Vui lòng chọn ngày trả phòng";
     }
 
-    if (!formData.identityCard.trim()) {
-      newErrors.identityCard = "Vui lòng nhập số CMND/CCCD";
-    }
-
-    if (!formData.roomID) {
-      newErrors.roomID = "Vui lòng chọn phòng";
-    }
-
-    if (!formData.checkOutDate) {
-      newErrors.checkOutDate = "Vui lòng chọn ngày trả phòng";
-    }
-
-    if (formData.checkInDate && formData.checkOutDate) {
-      const checkIn = new Date(formData.checkInDate);
-      const checkOut = new Date(formData.checkOutDate);
-
+    if (singleRoom.checkInDate && singleRoom.checkOutDate) {
+      const checkIn = new Date(singleRoom.checkInDate);
+      const checkOut = new Date(singleRoom.checkOutDate);
       if (checkOut <= checkIn) {
-        newErrors.checkOutDate = "Ngày trả phải sau ngày nhận";
+        roomErrors.checkOutDate = "Ngày trả phải sau ngày nhận";
       }
     }
 
-    if (formData.depositAmount < 0) {
+    if (Object.keys(roomErrors).length > 0) {
+      setErrors((prev) => ({ ...prev, ...roomErrors }));
+      return;
+    }
+
+    // Add room to list
+    setRoomAssignments((prev) => [
+      ...prev,
+      {
+        roomID: singleRoom.roomID,
+        numberOfGuests: singleRoom.numberOfGuests,
+        checkInDate: singleRoom.checkInDate,
+        checkOutDate: singleRoom.checkOutDate,
+      },
+    ]);
+
+    // Reset form
+    setSingleRoom({
+      roomID: "",
+      numberOfGuests: 1,
+      checkInDate: new Date().toISOString().split("T")[0],
+      checkOutDate: "",
+    });
+
+    // Clear errors
+    setErrors({});
+  };
+
+  const removeRoom = (roomID: string) => {
+    setRoomAssignments((prev) => prev.filter((a) => a.roomID !== roomID));
+  };
+
+  const handleConfirmNguoio = (guests: any[]) => {
+    setRegisteredGuests(guests);
+  };
+
+  const validateForm = (): boolean => {
+    const newErrors: Record<string, string> = {};
+
+    if (!customerInfo.customerName.trim()) {
+      newErrors.customerName = "Vui lòng nhập tên khách hàng";
+    }
+
+    if (!customerInfo.phoneNumber.trim()) {
+      newErrors.phoneNumber = "Vui lòng nhập số điện thoại";
+    } else if (!/^[0-9]{10}$/.test(customerInfo.phoneNumber)) {
+      newErrors.phoneNumber = "Số điện thoại không hợp lệ (10 chữ số)";
+    }
+
+    if (!customerInfo.identityCard.trim()) {
+      newErrors.identityCard = "Vui lòng nhập số CMND/CCCD";
+    }
+
+    if (roomAssignments.length === 0) {
+      newErrors.rooms = "Vui lòng thêm ít nhất một phòng";
+    }
+
+    if (depositAmount < 0) {
       newErrors.depositAmount = "Tiền cọc không được âm";
     }
 
@@ -122,39 +189,60 @@ export function WalkInModal({ open, onOpenChange, onConfirm }: WalkInModalProps)
 
   const handleSubmit = () => {
     if (validateForm()) {
+      const formData: WalkInFormData = {
+        customerName: customerInfo.customerName,
+        phoneNumber: customerInfo.phoneNumber,
+        identityCard: customerInfo.identityCard,
+        email: customerInfo.email || undefined,
+        address: customerInfo.address || undefined,
+        roomAssignments,
+        depositAmount,
+        notes: notes.trim() || undefined,
+      };
+
       onConfirm(formData);
       onOpenChange(false);
+
       // Reset form
-      setFormData({
+      setCustomerInfo({
         customerName: "",
         phoneNumber: "",
         identityCard: "",
         email: "",
         address: "",
+      });
+      setSingleRoom({
         roomID: "",
         numberOfGuests: 1,
         checkInDate: new Date().toISOString().split("T")[0],
         checkOutDate: "",
-        depositAmount: 0,
-        notes: "",
       });
+      setRoomAssignments([]);
+      setDepositAmount(0);
+      setNotes("");
       setErrors({});
     }
   };
 
-  const selectedRoom = mockRooms.find((r) => r.roomID === formData.roomID);
-  const selectedRoomType = selectedRoom
-    ? mockRoomTypes.find((rt) => rt.roomTypeID === selectedRoom.roomTypeID)
-    : null;
+  const calculateTotal = (): number => {
+    return roomAssignments.reduce((total, assignment) => {
+      const room = mockRooms.find((r) => r.roomID === assignment.roomID);
+      const roomType = room ? mockRoomTypes.find((rt) => rt.roomTypeID === room.roomTypeID) : null;
 
-  const calculateTotal = () => {
-    if (!formData.checkInDate || !formData.checkOutDate || !selectedRoomType) return 0;
+      if (!roomType) return total;
 
-    const checkIn = new Date(formData.checkInDate);
-    const checkOut = new Date(formData.checkOutDate);
-    const nights = Math.ceil((checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24));
+      const checkIn = new Date(assignment.checkInDate);
+      const checkOut = new Date(assignment.checkOutDate);
+      const nights = Math.ceil((checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24));
 
-    return selectedRoomType.price * nights;
+      return total + roomType.price * nights;
+    }, 0);
+  };
+
+  const getRoomInfo = (roomID: string) => {
+    const room = mockRooms.find((r) => r.roomID === roomID);
+    const roomType = room ? mockRoomTypes.find((rt) => rt.roomTypeID === room.roomTypeID) : null;
+    return { room, roomType };
   };
 
   const totalAmount = calculateTotal();
@@ -172,7 +260,7 @@ export function WalkInModal({ open, onOpenChange, onConfirm }: WalkInModalProps)
                 Khách vãng lai (Walk-in)
               </DialogTitle>
               <p className="text-sm text-gray-600 font-medium mt-1">
-                Tạo phiếu thuê phòng cho khách đến trực tiếp
+                Tạo phiếu thuê phòng cho khách đến trực tiếp (hỗ trợ nhiều phòng)
               </p>
             </div>
           </div>
@@ -183,9 +271,7 @@ export function WalkInModal({ open, onOpenChange, onConfirm }: WalkInModalProps)
           <div className="bg-white rounded-xl border-2 border-gray-200 p-6 shadow-sm">
             <div className="flex items-center gap-2 mb-5">
               <div className="w-5 h-5 flex items-center justify-center text-primary-600">{ICONS.USER}</div>
-              <h3 className="text-lg font-extrabold text-gray-900">
-                Thông tin khách hàng
-              </h3>
+              <h3 className="text-lg font-extrabold text-gray-900">Thông tin khách hàng</h3>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
@@ -194,8 +280,8 @@ export function WalkInModal({ open, onOpenChange, onConfirm }: WalkInModalProps)
                 </Label>
                 <Input
                   id="customerName"
-                  value={formData.customerName}
-                  onChange={(e) => handleChange("customerName", e.target.value)}
+                  value={customerInfo.customerName}
+                  onChange={(e) => handleCustomerChange("customerName", e.target.value)}
                   placeholder="Nguyễn Văn An"
                   className={`h-11 mt-2 border-2 rounded-lg font-medium ${errors.customerName ? "border-red-600" : "border-gray-300"}`}
                 />
@@ -210,8 +296,8 @@ export function WalkInModal({ open, onOpenChange, onConfirm }: WalkInModalProps)
                 </Label>
                 <Input
                   id="phoneNumber"
-                  value={formData.phoneNumber}
-                  onChange={(e) => handleChange("phoneNumber", e.target.value)}
+                  value={customerInfo.phoneNumber}
+                  onChange={(e) => handleCustomerChange("phoneNumber", e.target.value)}
                   placeholder="0901234567"
                   className={`h-11 mt-2 border-2 rounded-lg font-medium ${errors.phoneNumber ? "border-red-600" : "border-gray-300"}`}
                 />
@@ -226,8 +312,8 @@ export function WalkInModal({ open, onOpenChange, onConfirm }: WalkInModalProps)
                 </Label>
                 <Input
                   id="identityCard"
-                  value={formData.identityCard}
-                  onChange={(e) => handleChange("identityCard", e.target.value)}
+                  value={customerInfo.identityCard}
+                  onChange={(e) => handleCustomerChange("identityCard", e.target.value)}
                   placeholder="079012345678"
                   className={`h-11 mt-2 border-2 rounded-lg font-medium ${errors.identityCard ? "border-red-600" : "border-gray-300"}`}
                 />
@@ -241,8 +327,8 @@ export function WalkInModal({ open, onOpenChange, onConfirm }: WalkInModalProps)
                 <Input
                   id="email"
                   type="email"
-                  value={formData.email}
-                  onChange={(e) => handleChange("email", e.target.value)}
+                  value={customerInfo.email}
+                  onChange={(e) => handleCustomerChange("email", e.target.value)}
                   placeholder="example@email.com"
                   className="h-11 mt-2 border-2 border-gray-300 rounded-lg font-medium"
                 />
@@ -252,8 +338,8 @@ export function WalkInModal({ open, onOpenChange, onConfirm }: WalkInModalProps)
                 <Label htmlFor="address" className="text-sm font-bold text-gray-700 uppercase tracking-wide">Địa chỉ</Label>
                 <Input
                   id="address"
-                  value={formData.address}
-                  onChange={(e) => handleChange("address", e.target.value)}
+                  value={customerInfo.address}
+                  onChange={(e) => handleCustomerChange("address", e.target.value)}
                   placeholder="123 Lê Lợi, Q.1, TP.HCM"
                   className="h-11 mt-2 border-2 border-gray-300 rounded-lg font-medium"
                 />
@@ -265,33 +351,27 @@ export function WalkInModal({ open, onOpenChange, onConfirm }: WalkInModalProps)
           <div className="bg-white rounded-xl border-2 border-gray-200 p-6 shadow-sm">
             <div className="flex items-center gap-2 mb-5">
               <div className="w-5 h-5 flex items-center justify-center text-primary-600">{ICONS.BED_DOUBLE}</div>
-              <h3 className="text-lg font-extrabold text-gray-900">
-                Thông tin phòng
-              </h3>
+              <h3 className="text-lg font-extrabold text-gray-900">Thông tin phòng</h3>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
               <div>
                 <Label htmlFor="roomID" className="text-sm font-bold text-gray-700 uppercase tracking-wide">
                   Chọn phòng <span className="text-red-600">*</span>
                 </Label>
-                <Select value={formData.roomID} onValueChange={(value) => handleChange("roomID", value)}>
+                <Select value={singleRoom.roomID} onValueChange={(value) => handleRoomChange("roomID", value)}>
                   <SelectTrigger className={`h-12 mt-2 border-2 rounded-lg font-medium ${errors.roomID ? "border-red-600" : "border-gray-300"}`}>
                     <SelectValue placeholder="Chọn phòng trống" />
                   </SelectTrigger>
                   <SelectContent>
-                    {availableRooms.length === 0 ? (
+                    {getAvailableRooms().length === 0 ? (
                       <SelectItem value="no-rooms" disabled>
                         Không có phòng trống
                       </SelectItem>
                     ) : (
-                      availableRooms.map((room) => (
+                      getAvailableRooms().map((room) => (
                         <SelectItem key={room.roomID} value={room.roomID}>
-                          <div className="flex items-center justify-between gap-4">
-                            <span className="font-semibold">{room.roomName}</span>
-                            <span className="text-xs text-gray-500">
-                              {room.roomType?.roomTypeName} - {room.roomType?.price.toLocaleString("vi-VN")} ₫/đêm
-                            </span>
-                          </div>
+                          <span className="font-semibold">{room.roomName}</span>
                         </SelectItem>
                       ))
                     )}
@@ -311,8 +391,8 @@ export function WalkInModal({ open, onOpenChange, onConfirm }: WalkInModalProps)
                     id="numberOfGuests"
                     type="number"
                     min="1"
-                    value={formData.numberOfGuests}
-                    onChange={(e) => handleChange("numberOfGuests", parseInt(e.target.value) || 1)}
+                    value={singleRoom.numberOfGuests}
+                    onChange={(e) => handleRoomChange("numberOfGuests", parseInt(e.target.value) || 1)}
                     className="h-9 mt-2 border-2 border-gray-300 rounded-lg font-medium text-center w-full"
                   />
                 </div>
@@ -325,8 +405,8 @@ export function WalkInModal({ open, onOpenChange, onConfirm }: WalkInModalProps)
                 <Input
                   id="checkInDate"
                   type="date"
-                  value={formData.checkInDate}
-                  onChange={(e) => handleChange("checkInDate", e.target.value)}
+                  value={singleRoom.checkInDate}
+                  onChange={(e) => handleRoomChange("checkInDate", e.target.value)}
                   className="h-11 mt-2 border-2 border-gray-300 rounded-lg font-medium"
                 />
               </div>
@@ -338,15 +418,80 @@ export function WalkInModal({ open, onOpenChange, onConfirm }: WalkInModalProps)
                 <Input
                   id="checkOutDate"
                   type="date"
-                  value={formData.checkOutDate}
-                  onChange={(e) => handleChange("checkOutDate", e.target.value)}
+                  value={singleRoom.checkOutDate}
+                  onChange={(e) => handleRoomChange("checkOutDate", e.target.value)}
                   className={`h-11 mt-2 border-2 rounded-lg font-medium ${errors.checkOutDate ? "border-red-600" : "border-gray-300"}`}
                 />
                 {errors.checkOutDate && (
                   <p className="text-sm text-red-600 mt-1.5 font-semibold">{errors.checkOutDate}</p>
                 )}
               </div>
+            </div>
 
+            {/* Add Room Button */}
+            <Button
+              type="button"
+              onClick={addRoom}
+              className="w-full h-11 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-lg mb-5"
+            >
+              <span className="w-5 h-5 mr-2">{ICONS.PLUS}</span>
+              Thêm phòng
+            </Button>
+
+            {/* Selected Rooms List */}
+            {roomAssignments.length > 0 && (
+              <div className="space-y-3 border-t-2 border-gray-200 pt-5">
+                <h4 className="text-sm font-bold text-gray-900">Phòng đã chọn ({roomAssignments.length})</h4>
+                {roomAssignments.map((assignment) => {
+                  const { room, roomType } = getRoomInfo(assignment.roomID);
+                  const nights = Math.ceil(
+                    (new Date(assignment.checkOutDate).getTime() - new Date(assignment.checkInDate).getTime()) /
+                      (1000 * 60 * 60 * 24)
+                  );
+                  const price = roomType ? roomType.price * nights : 0;
+
+                  return (
+                    <div key={assignment.roomID} className="bg-gray-50 rounded-lg p-4 flex items-center justify-between border-2 border-gray-200">
+                      <div>
+                        <div className="font-bold text-gray-900">{room?.roomName}</div>
+                        <div className="text-sm text-gray-600 mt-1">
+                          {roomType?.roomTypeName} • {nights} đêm • {assignment.numberOfGuests} khách
+                        </div>
+                        <div className="text-xs text-gray-500 mt-1">
+                          {new Date(assignment.checkInDate).toLocaleDateString("vi-VN")} → {new Date(assignment.checkOutDate).toLocaleDateString("vi-VN")}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="text-right">
+                          <div className="text-lg font-bold text-primary-600">{price.toLocaleString("vi-VN")} ₫</div>
+                          <Badge className="mt-1 bg-primary-600 text-white text-xs">{roomType?.roomTypeName}</Badge>
+                        </div>
+                        <Button
+                          type="button"
+                          onClick={() => removeRoom(assignment.roomID)}
+                          variant="destructive"
+                          size="sm"
+                          className="h-9 w-9 p-0"
+                        >
+                          <span className="w-4 h-4">{ICONS.TRASH}</span>
+                        </Button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {roomAssignments.length === 0 && (
+              <div className="bg-warning-50 border-2 border-warning-300 rounded-lg p-4">
+                <p className="text-sm text-warning-700 font-semibold">
+                  {errors.rooms || "Chưa có phòng nào được chọn"}
+                </p>
+              </div>
+            )}
+
+            {/* Summary */}
+            <div className="mt-5 space-y-3 border-t-2 border-gray-200 pt-5">
               <div>
                 <Label htmlFor="depositAmount" className="text-sm font-bold text-gray-700 uppercase tracking-wide">
                   Tiền cọc (₫)
@@ -355,8 +500,8 @@ export function WalkInModal({ open, onOpenChange, onConfirm }: WalkInModalProps)
                   id="depositAmount"
                   type="number"
                   min="0"
-                  value={formData.depositAmount}
-                  onChange={(e) => handleChange("depositAmount", parseInt(e.target.value) || 0)}
+                  value={depositAmount}
+                  onChange={(e) => setDepositAmount(parseInt(e.target.value) || 0)}
                   className="h-11 mt-2 border-2 border-gray-300 rounded-lg font-medium"
                 />
               </div>
@@ -367,48 +512,70 @@ export function WalkInModal({ open, onOpenChange, onConfirm }: WalkInModalProps)
                 </Label>
                 <Textarea
                   id="notes"
-                  value={formData.notes}
-                  onChange={(e) => handleChange("notes", e.target.value)}
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
                   placeholder="Yêu cầu đặc biệt..."
                   rows={3}
                   className="mt-2 border-2 border-gray-300 rounded-lg font-medium"
                 />
               </div>
-            </div>
 
-            {/* Summary */}
-            {totalAmount > 0 && (
-              <div className="mt-6 p-4 bg-linear-to-r from-primary-50 to-primary-100 rounded-lg border-2 border-primary-200">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-bold text-gray-700">Tổng tiền phòng dự kiến:</span>
-                  <span className="text-2xl font-extrabold text-primary-600">
-                    {totalAmount.toLocaleString("vi-VN")} ₫
-                  </span>
+              {totalAmount > 0 && (
+                <div className="p-4 bg-linear-to-r from-primary-50 to-primary-100 rounded-lg border-2 border-primary-200">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-bold text-gray-700">Tổng tiền phòng dự kiến:</span>
+                    <span className="text-2xl font-extrabold text-primary-600">
+                      {totalAmount.toLocaleString("vi-VN")} ₫
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-bold text-gray-700">Tiền cọc:</span>
+                    <span className="text-lg font-bold text-primary-600">
+                      {depositAmount.toLocaleString("vi-VN")} ₫
+                    </span>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
 
         <DialogFooter className="border-t-2 border-gray-200 pt-5 bg-gray-50">
-          <div className="flex items-center justify-end gap-3 w-full">
+          <div className="flex items-center justify-between w-full gap-3">
             <Button
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              className="h-11 px-6 border-2 border-gray-300 font-bold hover:bg-gray-100"
+              onClick={() => setNguoioModalOpen(true)}
+              className="h-11 bg-linear-to-r from-info-500 to-info-600 hover:from-info-600 hover:to-info-700 text-white font-bold shadow-md"
             >
-              <div className="w-4 h-4 mr-2 flex items-center justify-center">{ICONS.CLOSE}</div>
-              Hủy
+              {ICONS.USERS}
+              Đăng ký lưu trú 
             </Button>
-            <Button
-              onClick={handleSubmit}
-              className="h-11 px-6 bg-linear-to-r from-success-600 to-success-500 hover:from-success-500 hover:to-success-600 font-bold shadow-lg text-white"
-            >
-              <div className="w-4 h-4 mr-2 flex items-center justify-center">{ICONS.CHECK}</div>
-              Xác nhận Check-in
-            </Button>
+
+            <div className="flex items-center justify-end gap-3">
+              <Button
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+                className="h-11 px-6 border-2 border-gray-300 font-bold hover:bg-gray-100"
+              >
+                <div className="w-4 h-4 mr-2 flex items-center justify-center">{ICONS.CLOSE}</div>
+                Hủy
+              </Button>
+              <Button
+                onClick={handleSubmit}
+                className="h-11 px-6 bg-linear-to-r from-success-600 to-success-500 hover:from-success-500 hover:to-success-600 font-bold shadow-lg text-white"
+              >
+                {ICONS.CHECK}
+                Xác nhận Check-in
+              </Button>
+            </div>
           </div>
         </DialogFooter>
+
+        {/* Người ở Modal */}
+        <NguoioFormModal 
+          open={nguoioModalOpen} 
+          onOpenChange={setNguoioModalOpen}
+          onSubmit={handleConfirmNguoio}
+        />
       </DialogContent>
     </Dialog>
   );
