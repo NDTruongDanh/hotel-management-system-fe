@@ -2,6 +2,7 @@ import { logger } from "@/lib/utils/logger";
 import { useState, useEffect, useMemo } from "react";
 import { RoomType } from "@/lib/types/room";
 import { roomService } from "@/lib/services";
+import { getAccessToken } from "@/lib/services/api";
 import type { RoomType as ApiRoomType, Room as ApiRoom } from "@/lib/types/api";
 import { ApiError } from "@/lib/services/api";
 
@@ -53,6 +54,13 @@ export function useRoomTypes() {
 
   const loadRoomTypes = async () => {
     try {
+      // Check if token exists before making API call
+      if (!getAccessToken()) {
+        setError("Vui lòng đăng nhập để tiếp tục");
+        setLoading(false);
+        return;
+      }
+
       setLoading(true);
       const result = await roomService.getRoomTypes({
         page: 1,
@@ -73,6 +81,11 @@ export function useRoomTypes() {
 
   const loadRooms = async () => {
     try {
+      // Check if token exists before making API call
+      if (!getAccessToken()) {
+        return;
+      }
+
       const result = await roomService.getRooms({
         page: 1,
         limit: 100,

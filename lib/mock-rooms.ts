@@ -322,11 +322,12 @@ export const searchAvailableRooms = (
     return isAvailable;
   });
 
-  // Apply room type filter if specified
+  // Apply room type filter if specified (filter by room type name)
   if (roomTypeFilter && roomTypeFilter !== "Tất cả") {
-    availableRooms = availableRooms.filter(
-      (room) => room.roomTypeID === roomTypeFilter
-    );
+    availableRooms = availableRooms.filter((room) => {
+      const roomType = mockRoomTypes.find((rt) => rt.roomTypeID === room.roomTypeID);
+      return roomType?.roomTypeName === roomTypeFilter;
+    });
   }
 
   // In real app, would check against reservations database for date conflicts
