@@ -10,6 +10,8 @@ import {
   ReservationFormData,
   ReservationEvent,
 } from "@/lib/types/reservation";
+import { Room } from "@/lib/types/room";
+import { searchAvailableRooms } from "@/lib/mock-rooms";
 
 type ViewMode = "calendar" | "list";
 
@@ -28,9 +30,16 @@ export function useReservations() {
   // Modal states
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
+  const [isAvailableRoomsModalOpen, setIsAvailableRoomsModalOpen] = useState(false);
+  const [availableRooms, setAvailableRooms] = useState<Room[]>([]);
   const [selectedReservation, setSelectedReservation] =
     useState<Reservation | null>(null);
   const [formMode, setFormMode] = useState<"create" | "edit">("create");
+
+  // Room selection state (for optional specific room selection during booking)
+  const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
+  const [isRoomSelectionModalOpen, setIsRoomSelectionModalOpen] =
+    useState(false);
 
   // Filter reservations
   const filteredReservations = useMemo(() => {
@@ -64,13 +73,39 @@ export function useReservations() {
     return convertReservationsToEvents(filteredReservations);
   }, [filteredReservations]);
 
-  // Handle search
-  const handleSearch = () => {
-    // In real app, this would trigger API call
+  // Handle search for available rooms (Find tab)
+  const handleSearch = (findCheckInDate: string, findCheckOutDate: string, findRoomType: string) => {
+    if (!findCheckInDate || !findCheckOutDate) {
+      alert("Vui lòng chọn ngày đến và ngày đi!");
+      return;
+    }
+
     logger.log("Searching for available rooms...", {
+      checkInDate: findCheckInDate,
+      checkOutDate: findCheckOutDate,
+      roomTypeFilter: findRoomType,
+    });
+
+    // Search available rooms
+    const rooms = searchAvailableRooms(
+      findCheckInDate,
+      findCheckOutDate,
+      findRoomType !== "Tất cả" ? findRoomType : undefined
+    );
+
+    setAvailableRooms(rooms);
+    setIsAvailableRoomsModalOpen(true);
+  };
+
+  // Handle filter for calendar/list (Filter tab) - doesn't open modal
+  const handleFilterBookings = () => {
+    // Filter state is already set by onCheckInChange, onCheckOutChange, etc.
+    // The calendar and list will automatically update via filteredReservations
+    logger.log("Filtering bookings...", {
       checkInDate,
       checkOutDate,
       roomTypeFilter,
+      statusFilter,
     });
   };
 
@@ -80,6 +115,26 @@ export function useReservations() {
     setCheckOutDate("");
     setRoomTypeFilter("Tất cả");
     setStatusFilter("Tất cả");
+  };
+
+  // Handle room selection from available rooms modal
+  const handleSelectRoom = (room: Room) => {
+    logger.log("Room selected:", room);
+    setSelectedRoom(room);
+    setIsAvailableRoomsModalOpen(false);
+    setIsRoomSelectionModalOpen(true); // Show confirmation modal
+  };
+
+  // Handle confirm room selection
+  const handleConfirmRoomSelection = () => {
+    // The form will handle adding this room to the booking
+    setIsRoomSelectionModalOpen(false);
+  };
+
+  // Handle clear room selection
+  const handleClearRoomSelection = () => {
+    setSelectedRoom(null);
+    setIsRoomSelectionModalOpen(false);
   };
 
   // Handle create new reservation
@@ -234,6 +289,15 @@ export function useReservations() {
     setSelectedReservation(null);
   };
 
+  const handleCloseAvailableRoomsModal = () => {
+    setIsAvailableRoomsModalOpen(false);
+  };
+
+  const handleCloseRoomSelectionModal = () => {
+    setIsRoomSelectionModalOpen(false);
+    setSelectedRoom(null);
+  };
+
   return {
     // State
     viewMode,
@@ -246,8 +310,12 @@ export function useReservations() {
     statusFilter,
     isFormModalOpen,
     isCancelModalOpen,
+    isAvailableRoomsModalOpen,
+    availableRooms,
     selectedReservation,
     formMode,
+    selectedRoom,
+    isRoomSelectionModalOpen,
 
     // Actions
     setViewMode,
@@ -256,6 +324,7 @@ export function useReservations() {
     setRoomTypeFilter,
     setStatusFilter,
     handleSearch,
+    handleFilterBookings,
     handleReset,
     handleCreateNew,
     handleEdit,
@@ -265,5 +334,10 @@ export function useReservations() {
     handleViewDetails,
     handleCloseFormModal,
     handleCloseCancelModal,
+    handleCloseAvailableRoomsModal,
+    handleSelectRoom,
+    handleConfirmRoomSelection,
+    handleClearRoomSelection,
+    handleCloseRoomSelectionModal,
   };
 }

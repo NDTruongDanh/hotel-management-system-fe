@@ -1,10 +1,9 @@
 "use client";
 
-
 import { logger } from "@/lib/utils/logger";
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import type { Employee, AuthTokens } from "@/lib/types/auth";
+import type { Employee } from "@/lib/types/api";
 import { authService } from "@/lib/services/auth.service";
 import { ApiError } from "@/lib/services/api";
 
@@ -13,7 +12,7 @@ interface UseAuthReturn {
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
-  login: (email: string, password: string) => Promise<boolean>;
+  login: (username: string, password: string) => Promise<boolean>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
   clearError: () => void;
@@ -57,18 +56,18 @@ export function useAuth(): UseAuthReturn {
   }, []);
 
   const login = useCallback(
-    async (email: string, password: string): Promise<boolean> => {
+    async (username: string, password: string): Promise<boolean> => {
       setIsLoading(true);
       setError(null);
 
       try {
-        const response = await authService.login(email, password);
-        setUser(response.user);
+        const response = await authService.login(username, password);
+        setUser(response.employee);
         return true;
       } catch (err) {
         if (err instanceof ApiError) {
           if (err.statusCode === 401) {
-            setError("Email hoặc mật khẩu không đúng");
+            setError("Tên đăng nhập hoặc mật khẩu không đúng");
           } else {
             setError(err.message || "Có lỗi xảy ra. Vui lòng thử lại.");
           }

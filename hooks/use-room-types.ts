@@ -1,14 +1,36 @@
 import { logger } from "@/lib/utils/logger";
 import { useState, useEffect, useMemo } from "react";
 import { RoomType } from "@/lib/types/room";
-import {
-  getRoomTypes,
-  createRoomType,
-  updateRoomType,
-  deleteRoomType,
-  checkRoomTypeInUse,
-} from "@/lib/mock-room-types";
-import { mockRooms } from "@/lib/mock-rooms";
+import { roomService } from "@/lib/services";
+import type { RoomType as ApiRoomType, Room as ApiRoom } from "@/lib/types/api";
+import { ApiError } from "@/lib/services/api";
+
+// Map API RoomType to local RoomType format
+function mapApiToRoomType(apiType: ApiRoomType): RoomType {
+  // Convert amenities object to array of keys
+  const amenitiesArray: string[] = apiType.amenities 
+    ? Object.keys(apiType.amenities).filter(key => apiType.amenities![key])
+    : [];
+
+  return {
+    roomTypeID: apiType.id,
+    roomTypeName: apiType.name,
+    capacity: apiType.capacity,
+    price: parseFloat(apiType.pricePerNight),
+    amenities: amenitiesArray,
+  };
+}
+
+// Convert local amenities array to API format
+function convertAmenitiesToApi(amenities?: string[]): Record<string, boolean> | undefined {
+  if (!amenities || amenities.length === 0) return undefined;
+  
+  const result: Record<string, boolean> = {};
+  amenities.forEach(amenity => {
+    result[amenity] = true;
+  });
+  return result;
+}
 
 export function useRoomTypes() {
   const [roomTypes, setRoomTypes] = useState<RoomType[]>([]);
@@ -17,6 +39,7 @@ export function useRoomTypes() {
   const [editingRoomType, setEditingRoomType] = useState<RoomType | null>(null);
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [rooms, setRooms] = useState<ApiRoom[]>([]);
 
   // Filter states
   const [searchTerm, setSearchTerm] = useState("");
@@ -25,19 +48,38 @@ export function useRoomTypes() {
 
   useEffect(() => {
     loadRoomTypes();
+    loadRooms();
   }, []);
 
   const loadRoomTypes = async () => {
     try {
       setLoading(true);
-      const data = await getRoomTypes();
-      setRoomTypes(data);
+      const result = await roomService.getRoomTypes({
+        page: 1,
+        limit: 100,
+        sortBy: "name",
+        sortOrder: "asc",
+      });
+      setRoomTypes(result.data.map(mapApiToRoomType));
       setError(null);
     } catch (err) {
+      const message = err instanceof ApiError ? err.message : "Không thể tải danh sách loại phòng";
       logger.error("Error loading room types:", err);
-      setError("Không thể tải danh sách loại phòng");
+      setError(message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadRooms = async () => {
+    try {
+      const result = await roomService.getRooms({
+        page: 1,
+        limit: 100,
+      });
+      setRooms(result.data);
+    } catch (err) {
+      logger.error("Error loading rooms:", err);
     }
   };
 
@@ -83,28 +125,40 @@ export function useRoomTypes() {
     try {
       if (editingRoomType) {
         // Update existing room type
-        await updateRoomType(editingRoomType.roomTypeID, roomTypeData);
+        const updated = await roomService.updateRoomType(editingRoomType.roomTypeID, {
+          name: roomTypeData.roomTypeName,
+          capacity: roomTypeData.capacity,
+          pricePerNight: roomTypeData.price,
+          amenities: convertAmenitiesToApi(roomTypeData.amenities),
+        });
+        setRoomTypes(prev => prev.map(rt => 
+          rt.roomTypeID === editingRoomType.roomTypeID ? mapApiToRoomType(updated) : rt
+        ));
       } else {
         // Create new room type
-        await createRoomType(roomTypeData as Omit<RoomType, "roomTypeID">);
+        const created = await roomService.createRoomType({
+          name: roomTypeData.roomTypeName!,
+          capacity: roomTypeData.capacity!,
+          pricePerNight: roomTypeData.price!,
+          amenities: convertAmenitiesToApi(roomTypeData.amenities),
+        });
+        setRoomTypes(prev => [...prev, mapApiToRoomType(created)]);
       }
-      await loadRoomTypes();
       setModalOpen(false);
       setEditingRoomType(null);
     } catch (err) {
-      throw new Error(
-        err instanceof Error ? err.message : "Không thể lưu loại phòng"
-      );
+      const message = err instanceof ApiError ? err.message : "Không thể lưu loại phòng";
+      throw new Error(message);
     }
   };
 
   const handleDelete = async (roomTypeID: string) => {
     // Check if room type is in use
-    const inUse = checkRoomTypeInUse(roomTypeID);
-
-    if (inUse) {
+    const roomsUsingType = rooms.filter(r => r.roomTypeId === roomTypeID);
+    
+    if (roomsUsingType.length > 0) {
       setError(
-        "Không thể xóa loại phòng đang được sử dụng. Bạn chỉ có thể chỉnh sửa thông tin."
+        `Không thể xóa loại phòng này vì đang có ${roomsUsingType.length} phòng sử dụng`
       );
       setTimeout(() => setError(null), 5000);
       return;
@@ -112,12 +166,14 @@ export function useRoomTypes() {
 
     try {
       setIsDeleting(roomTypeID);
-      await deleteRoomType(roomTypeID);
-      await loadRoomTypes();
+      await roomService.deleteRoomType(roomTypeID);
+      setRoomTypes(prev => prev.filter((rt) => rt.roomTypeID !== roomTypeID));
       setError(null);
     } catch (err) {
       logger.error("Error deleting room type:", err);
-      setError(err instanceof Error ? err.message : "Không thể xóa loại phòng");
+      const message = err instanceof ApiError ? err.message : 
+        (err instanceof Error ? err.message : "Không thể xóa loại phòng");
+      setError(message);
       setTimeout(() => setError(null), 5000);
     } finally {
       setIsDeleting(null);
@@ -153,17 +209,18 @@ export function useRoomTypes() {
   };
 
   // Calculate total rooms
-  const totalRooms = mockRooms.length;
+  const totalRooms = rooms.length;
 
   // Calculate most popular room type (based on number of rooms using that type)
   const mostPopularRoomType = useMemo(() => {
-    if (mockRooms.length === 0) return null;
+    if (rooms.length === 0) return null;
 
     const roomTypeCounts: Record<string, { name: string; count: number }> = {};
 
-    mockRooms.forEach((room) => {
-      const typeId = room.roomTypeID;
-      const typeName = room.roomType?.roomTypeName || typeId;
+    rooms.forEach((room) => {
+      const typeId = room.roomTypeId;
+      const roomType = roomTypes.find(rt => rt.roomTypeID === typeId);
+      const typeName = roomType?.roomTypeName || typeId;
 
       if (!roomTypeCounts[typeId]) {
         roomTypeCounts[typeId] = { name: typeName, count: 0 };
@@ -183,7 +240,7 @@ export function useRoomTypes() {
     });
 
     return popularType;
-  }, []);
+  }, [rooms, roomTypes]);
 
   return {
     roomTypes: filteredRoomTypes,

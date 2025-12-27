@@ -3,11 +3,13 @@
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ICONS } from "@/src/constants/icons.enum";
-import { ReservationFilters } from "@/components/reservations/reservation-filters";
+import { UnifiedReservationsFilter } from "@/components/reservations/unified-reservations-filter";
 import { ReservationCalendar } from "@/components/reservations/reservation-calendar";
 import { ReservationList } from "@/components/reservations/reservation-list";
 import { ReservationFormModal } from "@/components/reservations/reservation-form-modal";
 import { CancelReservationDialog } from "@/components/reservations/cancel-reservation-dialog";
+import { AvailableRoomsModal } from "@/components/reservations/available-rooms-modal";
+import { RoomSelectionModal } from "@/components/reservations/room-selection-modal";
 import { mockRoomTypes } from "@/lib/mock-room-types";
 import { useReservations } from "@/hooks/use-reservations";
 import { useMemo } from "react";
@@ -23,9 +25,13 @@ export default function ReservationsPage() {
     statusFilter,
     isFormModalOpen,
     isCancelModalOpen,
+    isAvailableRoomsModalOpen,
+    availableRooms,
     selectedReservation,
     formMode,
     reservations,
+    selectedRoom,
+    isRoomSelectionModalOpen,
     setViewMode,
     setCheckInDate,
     setCheckOutDate,
@@ -41,7 +47,18 @@ export default function ReservationsPage() {
     handleViewDetails,
     handleCloseFormModal,
     handleCloseCancelModal,
+    handleCloseAvailableRoomsModal,
+    handleSelectRoom,
+    handleConfirmRoomSelection,
+    handleCloseRoomSelectionModal,
   } = useReservations();
+
+  // Handler for Find Available Rooms (calls handleSearch from hook with date parameters)
+  const handleFindRoomsSearch = (findCheckInDate: string, findCheckOutDate: string, findRoomType: string) => {
+    // Call handleSearch which is already from useReservations hook
+    // It validates dates and opens AvailableRoomsModal
+    handleSearch(findCheckInDate, findCheckOutDate, findRoomType);
+  };
 
   // Calculate stats
   const stats = useMemo(() => {
@@ -164,8 +181,8 @@ export default function ReservationsPage() {
         </div>
       </div>
 
-      {/* Filters */}
-      <ReservationFilters
+      {/* Unified Filter with Tabs - Option B */}
+      <UnifiedReservationsFilter
         checkInDate={checkInDate}
         checkOutDate={checkOutDate}
         roomTypeFilter={roomTypeFilter}
@@ -175,8 +192,9 @@ export default function ReservationsPage() {
         onCheckOutChange={setCheckOutDate}
         onRoomTypeChange={setRoomTypeFilter}
         onStatusChange={setStatusFilter}
-        onSearch={handleSearch}
+        onFilterBookings={() => {}} // Filter happens automatically via filteredReservations
         onReset={handleReset}
+        onFindRoomsSearch={handleFindRoomsSearch}
       />
 
       {/* Tabs for View Mode */}
@@ -234,6 +252,28 @@ export default function ReservationsPage() {
         reservation={selectedReservation}
         onConfirm={handleConfirmCancel}
         onCancel={handleCloseCancelModal}
+      />
+
+      {/* Available Rooms Modal */}
+      <AvailableRoomsModal
+        isOpen={isAvailableRoomsModalOpen}
+        onClose={handleCloseAvailableRoomsModal}
+        availableRooms={availableRooms}
+        roomTypes={mockRoomTypes}
+        checkInDate={checkInDate}
+        checkOutDate={checkOutDate}
+        onSelectRoom={handleSelectRoom}
+      />
+
+      {/* Room Selection Confirmation Modal */}
+      <RoomSelectionModal
+        isOpen={isRoomSelectionModalOpen}
+        onClose={handleCloseRoomSelectionModal}
+        onConfirm={handleConfirmRoomSelection}
+        selectedRoom={selectedRoom}
+        roomTypes={mockRoomTypes}
+        checkInDate={checkInDate}
+        checkOutDate={checkOutDate}
       />
     </div>
   );
