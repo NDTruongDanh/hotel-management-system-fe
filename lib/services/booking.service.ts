@@ -9,14 +9,15 @@ import type {
   CreateBookingRequest,
   CreateBookingResponse,
   CheckInRequest,
+  CheckOutRequest,
   CreateTransactionRequest,
+  Booking,
+  BookingRoom,
 } from "@/lib/types/api";
 
 export interface BookingResponse {
-  bookingId: string;
-  bookingCode: string;
-  status: string;
-  totalAmount: number;
+  bookingRooms?: BookingRoom[];
+  booking?: Booking;
 }
 
 export const bookingService = {
@@ -55,11 +56,24 @@ export const bookingService = {
 
   /**
    * Check in guests for a booking (employee)
-   * PATCH /employee/bookings/check-in
+   * POST /employee/bookings/check-in
    */
   async checkIn(data: CheckInRequest): Promise<BookingResponse> {
-    const response = await api.patch<ApiResponse<BookingResponse>>(
+    const response = await api.post<ApiResponse<BookingResponse>>(
       "/employee/bookings/check-in",
+      data,
+      { requiresAuth: true }
+    );
+    return response.data;
+  },
+
+  /**
+   * Check out guests for a booking (employee)
+   * POST /employee/bookings/check-out
+   */
+  async checkOut(data: CheckOutRequest): Promise<BookingResponse> {
+    const response = await api.post<ApiResponse<BookingResponse>>(
+      "/employee/bookings/check-out",
       data,
       { requiresAuth: true }
     );
@@ -79,5 +93,39 @@ export const bookingService = {
       { requiresAuth: true }
     );
     return response.data;
+  },
+
+  /**
+   * Search bookings by query (code, customer name, phone)
+   * GET /employee/bookings/search?q=...
+   */
+  async searchBookings(query: string): Promise<Booking[]> {
+    try {
+      const response = await api.get<ApiResponse<Booking[]>>(
+        `/employee/bookings/search?q=${encodeURIComponent(query)}`,
+        { requiresAuth: true }
+      );
+      return response.data || [];
+    } catch (error) {
+      console.error("Search bookings failed:", error);
+      return [];
+    }
+  },
+
+  /**
+   * Get all bookings (employee)
+   * GET /employee/bookings
+   */
+  async getAllBookings(): Promise<Booking[]> {
+    try {
+      const response = await api.get<ApiResponse<Booking[]>>(
+        "/employee/bookings",
+        { requiresAuth: true }
+      );
+      return response.data || [];
+    } catch (error) {
+      console.error("Get all bookings failed:", error);
+      return [];
+    }
   },
 };

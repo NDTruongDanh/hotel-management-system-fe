@@ -71,6 +71,8 @@ import {
   Play,
   History,
   Split,
+  Building2,
+  ArrowLeft,
 } from "lucide-react";
 
 export const ICONS = {
@@ -151,4 +153,7 @@ export const ICONS = {
   SPARKLES: <Sparkles />,
   SPLIT: <Split />,
   CALENDAR_PLUS: <CalendarPlus />,
+  BUILDING: <Building2 />,
+  ARROW_LEFT: <ArrowLeft />,
+  LOADING: <Loader2 />,
 };

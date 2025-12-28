@@ -29,6 +29,23 @@ import {
 import { RoomType } from "@/lib/types/room";
 import { checkRoomAvailability } from "@/lib/mock-reservations";
 
+interface ReservationDetail {
+  roomTypeID?: string;
+  roomTypeId?: string;
+  roomTypeName?: string;
+  roomType?: {
+    roomTypeID?: string;
+    id?: string;
+    roomTypeName?: string;
+    name?: string;
+  };
+  pricePerNight?: number;
+  price?: number;
+  checkInDate?: string;
+  checkOutDate?: string;
+  numberOfGuests?: number;
+}
+
 interface ReservationFormModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -98,17 +115,37 @@ export function ReservationFormModal({
           };
 
           // Group details by room type with their dates
-          const groupedRooms = reservation.details.reduce((acc, detail) => {
-            const key = `${detail.roomTypeID}_${detail.checkInDate}_${detail.checkOutDate}`;
+          // Normalize possible field names coming from different sources (roomTypeID vs roomTypeId vs nested roomType)
+          const groupedRooms = reservation.details.reduce((acc, detail: ReservationDetail) => {
+            const roomTypeID =
+              detail.roomTypeID ||
+              detail.roomTypeId ||
+              detail.roomType?.roomTypeID ||
+              detail.roomType?.id ||
+              "";
+
+            const roomTypeName =
+              detail.roomTypeName ||
+              detail.roomType?.roomTypeName ||
+              detail.roomType?.name ||
+              "";
+
+            const pricePerNight =
+              detail.pricePerNight ?? detail.price ?? 0;
+
+            const checkIn = detail.checkInDate || "";
+            const checkOut = detail.checkOutDate || "";
+
+            const key = `${roomTypeID}_${checkIn}_${checkOut}`;
             if (!acc[key]) {
               acc[key] = {
-                roomTypeID: detail.roomTypeID,
-                roomTypeName: detail.roomTypeName,
+                roomTypeID,
+                roomTypeName,
                 quantity: 0,
-                numberOfGuests: detail.numberOfGuests,
-                pricePerNight: detail.pricePerNight,
-                checkInDate: detail.checkInDate,
-                checkOutDate: detail.checkOutDate,
+                numberOfGuests: detail.numberOfGuests || 1,
+                pricePerNight,
+                checkInDate: checkIn,
+                checkOutDate: checkOut,
               };
             }
             acc[key].quantity += 1;
@@ -117,7 +154,16 @@ export function ReservationFormModal({
 
           if (!cancelled) {
             setFormData(newFormData);
-            setRoomSelections(Object.values(groupedRooms));
+            const roomSelectionsList = Object.values(groupedRooms);
+            setRoomSelections(roomSelectionsList);
+            // Pre-select first room type when editing
+            if (roomSelectionsList.length > 0) {
+              setSelectedRoomType(roomSelectionsList[0].roomTypeID);
+              setSelectedCheckInDate(roomSelectionsList[0].checkInDate);
+              setSelectedCheckOutDate(roomSelectionsList[0].checkOutDate);
+              setQuantity(roomSelectionsList[0].quantity);
+              setGuestsPerRoom(roomSelectionsList[0].numberOfGuests);
+            }
           }
         } else {
           // Reset form for create mode
@@ -135,6 +181,11 @@ export function ReservationFormModal({
               notes: "",
             });
             setRoomSelections([]);
+            setSelectedRoomType("");
+            setSelectedCheckInDate("");
+            setSelectedCheckOutDate("");
+            setQuantity(1);
+            setGuestsPerRoom(1);
           }
         }
 

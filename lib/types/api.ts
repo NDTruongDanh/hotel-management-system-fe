@@ -374,13 +374,17 @@ export interface CreateBookingResponse {
   totalAmount: number;
 }
 
+// Check-in Request - matches backend CheckInPayload
 export interface CheckInRequest {
-  bookingId: string;
-  bookingRoomId: string;
-  guests: Array<{
-    customerId: string;
-    isPrimary?: boolean;
+  checkInInfo: Array<{
+    bookingRoomId: string;
+    customerIds: string[];
   }>;
+}
+
+// Check-out Request - matches backend CheckOutPayload
+export interface CheckOutRequest {
+  bookingRoomIds: string[];
 }
 
 export interface CreateTransactionRequest {
@@ -391,4 +395,49 @@ export interface CreateTransactionRequest {
   bookingRoomId?: string;
   transactionRef?: string;
   description?: string;
+}
+
+// Booking Room - represents individual room within a booking
+export interface BookingRoom {
+  id: string;
+  bookingId: string;
+  roomId: string;
+  roomTypeId: string;
+  checkInDate: string;
+  checkOutDate: string;
+  pricePerNight: string;
+  subtotalRoom: string;
+  totalAmount: string;
+  balance: string;
+  status: BookingStatus;
+  actualCheckIn?: string;
+  actualCheckOut?: string;
+  room?: Room;
+  roomType?: RoomType;
+  booking?: Booking;
+  bookingCustomers?: Array<{
+    bookingId: string;
+    customerId: string;
+    bookingRoomId: string;
+    isPrimary: boolean;
+    customer: Customer;
+  }>;
+}
+
+// Booking - main booking entity
+export interface Booking {
+  id: string;
+  bookingCode: string;
+  status: BookingStatus;
+  primaryCustomerId: string;
+  checkInDate: string;
+  checkOutDate: string;
+  totalGuests: number;
+  totalAmount: string;
+  depositRequired: string;
+  balance: string;
+  createdAt: string;
+  updatedAt: string;
+  primaryCustomer?: Customer;
+  bookingRooms?: BookingRoom[];
 }
