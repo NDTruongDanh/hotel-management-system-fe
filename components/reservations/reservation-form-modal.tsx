@@ -737,10 +737,12 @@ export function ReservationFormModal({
                   id="depositAmount"
                   type="number"
                   min="0"
-                  value={formData.depositAmount}
-                  onChange={(e) =>
-                    handleChange("depositAmount", parseInt(e.target.value) || 0)
-                  }
+                  value={formData.depositAmount === 0 ? "" : formData.depositAmount}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    handleChange("depositAmount", value === "" ? 0 : parseInt(value) || 0);
+                  }}
+                  placeholder="Nhập tiền cọc"
                   className={`h-11 mt-2 border-2 rounded-lg font-medium ${errors.depositAmount ? "border-red-600" : "border-gray-300"}`}
                 />
                 {errors.depositAmount && (
