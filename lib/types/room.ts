@@ -22,6 +22,7 @@ export interface RoomType {
   price: number;
   capacity: number;
   amenities: string[];
+  imageUrl?: string;
 }
 
 // Room

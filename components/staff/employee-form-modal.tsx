@@ -39,6 +39,7 @@ export function EmployeeFormModal({
     dateOfBirth: string;
     address: string;
     identityCard: string;
+    imageUrl: string;
     startDate: string;
   }>({
     fullName: "",
@@ -48,6 +49,7 @@ export function EmployeeFormModal({
     dateOfBirth: "",
     address: "",
     identityCard: "",
+    imageUrl: "",
     startDate: new Date().toISOString().split("T")[0],
   });
 
@@ -69,6 +71,7 @@ export function EmployeeFormModal({
             : "",
           address: employee.address || "",
           identityCard: employee.identityCard || "",
+          imageUrl: employee.imageUrl || "",
           startDate: new Date(employee.startDate).toISOString().split("T")[0],
         });
       } else {
@@ -80,6 +83,7 @@ export function EmployeeFormModal({
           dateOfBirth: "",
           address: "",
           identityCard: "",
+          imageUrl: "",
           startDate: new Date().toISOString().split("T")[0],
         });
       }
@@ -145,6 +149,7 @@ export function EmployeeFormModal({
           : undefined,
         address: formData.address.trim() || undefined,
         identityCard: formData.identityCard.trim() || undefined,
+        imageUrl: formData.imageUrl.trim() || undefined,
         startDate: new Date(formData.startDate),
       };
 
@@ -322,6 +327,25 @@ export function EmployeeFormModal({
               />
               {errors.address && (
                 <p className="text-xs text-red-500 mt-1">{errors.address}</p>
+              )}
+            </div>
+
+            {/* Image URL */}
+            <div className="col-span-2">
+              <Label htmlFor="imageUrl">URL Hình ảnh</Label>
+              <Input
+                id="imageUrl"
+                type="url"
+                value={formData.imageUrl}
+                onChange={(e) => handleChange("imageUrl", e.target.value)}
+                placeholder="https://example.com/employee.jpg"
+                className={errors.imageUrl ? "border-red-500" : ""}
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Nhập đường dẫn URL của hình ảnh nhân viên (không bắt buộc)
+              </p>
+              {errors.imageUrl && (
+                <p className="text-xs text-red-500 mt-1">{errors.imageUrl}</p>
               )}
             </div>
           </div>
