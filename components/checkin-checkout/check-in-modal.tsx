@@ -145,8 +145,13 @@ export function CheckInModal({
     roomAssignments.forEach((assignment) => {
       const formData: CheckInFormData = {
         reservationID: reservation.reservationID,
-        roomID: assignment.roomID,
-        numberOfGuests: assignment.numberOfGuests,
+        bookingId: reservation.reservationID,
+        checkInInfo: [
+          {
+            bookingRoomId: assignment.detailID,
+            customerIds: [],
+          }
+        ],
         notes: notes.trim() || undefined,
       };
       onConfirm(formData);

@@ -33,7 +33,10 @@ export const bookingService = {
       data,
       { requiresAuth: true }
     );
-    return response.data;
+    const unwrappedData = (response && typeof response === "object" && "data" in response)
+      ? (response as any).data
+      : response;
+    return unwrappedData;
   },
 
   /**
@@ -51,7 +54,10 @@ export const bookingService = {
     const response = await api.get<ApiResponse<BookingResponse>>(endpoint, {
       requiresAuth: true,
     });
-    return response.data;
+    const data = (response && typeof response === "object" && "data" in response)
+      ? (response as any).data
+      : response;
+    return data;
   },
 
   /**
@@ -64,7 +70,10 @@ export const bookingService = {
       data,
       { requiresAuth: true }
     );
-    return response.data;
+    const unwrappedData = (response && typeof response === "object" && "data" in response)
+      ? (response as any).data
+      : response;
+    return unwrappedData;
   },
 
   /**
@@ -77,7 +86,10 @@ export const bookingService = {
       data,
       { requiresAuth: true }
     );
-    return response.data;
+    const unwrappedData = (response && typeof response === "object" && "data" in response)
+      ? (response as any).data
+      : response;
+    return unwrappedData;
   },
 
   /**
@@ -92,7 +104,10 @@ export const bookingService = {
       data,
       { requiresAuth: true }
     );
-    return response.data;
+    const unwrappedData = (response && typeof response === "object" && "data" in response)
+      ? (response as any).data
+      : response;
+    return unwrappedData;
   },
 
   /**
