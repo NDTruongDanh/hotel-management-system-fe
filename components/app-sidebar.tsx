@@ -47,6 +47,11 @@ const roomManagement = [
     url: "/room-types",
     icon: ICONS.DOOR_OPEN,
   },
+  {
+    title: "Tiện Nghi",
+    url: "/room-tags",
+    icon: ICONS.TAG,
+  },
 ];
 
 const bookingManagement = [

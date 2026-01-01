@@ -202,12 +202,32 @@ export type RoomStatus =
   | "MAINTENANCE"
   | "OUT_OF_SERVICE";
 
+export interface RoomTag {
+  id: string;
+  name: string;
+  description?: string;
+  createdAt: string;
+  updatedAt: string;
+  _count?: {
+    roomTypeTags: number;
+  };
+}
+
+export interface RoomTypeTag {
+  id: string;
+  name: string;
+  roomTypeId: string;
+  roomTagId: string;
+  roomTag: RoomTag;
+}
+
 export interface RoomType {
   id: string;
   name: string;
   capacity: number;
+  totalBed: number;
   pricePerNight: string;
-  amenities?: Record<string, unknown>;
+  roomTypeTags?: RoomTypeTag[];
   createdAt: string;
   updatedAt: string;
   _count?: {
@@ -220,6 +240,7 @@ export interface Room {
   id: string;
   roomNumber: string;
   floor: number;
+  code: string;
   status: RoomStatus;
   roomTypeId: string;
   roomType?: RoomType;
@@ -233,6 +254,7 @@ export interface Room {
 export interface CreateRoomRequest {
   roomNumber: string;
   floor: number;
+  code?: string;
   roomTypeId: string;
   status?: RoomStatus;
 }
@@ -240,6 +262,7 @@ export interface CreateRoomRequest {
 export interface UpdateRoomRequest {
   roomNumber?: string;
   floor?: number;
+  code?: string;
   roomTypeId?: string;
   status?: RoomStatus;
 }
@@ -258,15 +281,17 @@ export interface GetRoomsParams {
 export interface CreateRoomTypeRequest {
   name: string;
   capacity: number;
+  totalBed: number;
   pricePerNight: number;
-  amenities?: Record<string, unknown>;
+  tagIds?: string[];
 }
 
 export interface UpdateRoomTypeRequest {
   name?: string;
   capacity?: number;
+  totalBed?: number;
   pricePerNight?: number;
-  amenities?: Record<string, unknown>;
+  tagIds?: string[];
 }
 
 export interface GetRoomTypesParams {

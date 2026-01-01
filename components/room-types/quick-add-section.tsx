@@ -14,7 +14,7 @@ import {
   formatPrice,
   getTemplateDescription,
 } from "@/lib/room-type-templates";
-import { RoomType } from "@/lib/types/room";
+import { RoomType } from "@/hooks/use-room-types";
 
 interface QuickAddSectionProps {
   onAddNew: () => void;

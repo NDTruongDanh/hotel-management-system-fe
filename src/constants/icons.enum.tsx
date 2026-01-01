@@ -73,6 +73,7 @@ import {
   Split,
   Building2,
   ArrowLeft,
+  Tag,
 } from "lucide-react";
 
 export const ICONS = {
@@ -156,4 +157,5 @@ export const ICONS = {
   BUILDING: <Building2 />,
   ARROW_LEFT: <ArrowLeft />,
   LOADING: <Loader2 />,
+  TAG: <Tag />,
 };
