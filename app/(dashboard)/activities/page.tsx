@@ -27,6 +27,7 @@ export default function ActivitiesPage() {
     error,
     filters,
     pagination,
+    stats,
     updateFilters,
     clearFilters,
     goToPage,
@@ -67,9 +68,7 @@ export default function ActivitiesPage() {
               <p className="text-sm text-white/90 font-semibold">Bookings</p>
             </div>
             <p className="text-4xl font-bold text-white">
-              {Array.isArray(activities)
-                ? activities.filter((a) => a.type.includes("BOOKING")).length
-                : 0}
+              {(stats?.BOOKING || 0) + (stats?.BOOKING_ROOM || 0)}
             </p>
             <p className="text-xs text-white/80 mt-2">Hoạt động đặt phòng</p>
           </div>
@@ -82,9 +81,7 @@ export default function ActivitiesPage() {
               <p className="text-sm text-white/90 font-semibold">Thanh Toán</p>
             </div>
             <p className="text-4xl font-bold text-white">
-              {Array.isArray(activities)
-                ? activities.filter((a) => a.type.includes("TRANSACTION")).length
-                : 0}
+              {stats?.TRANSACTION || 0}
             </p>
             <p className="text-xs text-white/80 mt-2">Giao dịch thanh toán</p>
           </div>
@@ -97,9 +94,7 @@ export default function ActivitiesPage() {
               <p className="text-sm text-white/90 font-semibold">Dịch Vụ</p>
             </div>
             <p className="text-4xl font-bold text-white">
-              {Array.isArray(activities)
-                ? activities.filter((a) => a.type.includes("SERVICE")).length
-                : 0}
+              {stats?.SERVICE_USAGE || 0}
             </p>
             <p className="text-xs text-white/80 mt-2">Sử dụng dịch vụ</p>
           </div>
@@ -112,9 +107,7 @@ export default function ActivitiesPage() {
               <p className="text-sm text-white/90 font-semibold">Khách Hàng</p>
             </div>
             <p className="text-4xl font-bold text-white">
-              {Array.isArray(activities)
-                ? activities.filter((a) => a.type.includes("CUSTOMER")).length
-                : 0}
+              {stats?.CUSTOMER || 0}
             </p>
             <p className="text-xs text-white/80 mt-2">Quản lý khách hàng</p>
           </div>

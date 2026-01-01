@@ -20,6 +20,7 @@ export function useActivities(
   const [totalPages, setTotalPages] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [stats, setStats] = useState<Record<string, number>>({});
   
   const [filters, setFilters] = useState<ActivityFilters>(initialFilters);
   const [pagination, setPagination] = useState<PaginationOptions>(initialPagination);
@@ -43,9 +44,24 @@ export function useActivities(
     }
   }, [filters, pagination]);
 
+  const fetchStats = useCallback(async () => {
+    try {
+      const statsData = await activityService.getActivityStats();
+      setStats(statsData || {});
+    } catch (err) {
+      console.error("Error fetching activity stats:", err);
+      setStats({});
+    }
+  }, []);
+
   useEffect(() => {
     fetchActivities();
   }, [fetchActivities]);
+
+  // Fetch stats only once on component mount (not on filter changes)
+  useEffect(() => {
+    fetchStats();
+  }, []);
 
   const updateFilters = useCallback((newFilters: Partial<ActivityFilters>) => {
     setFilters((prev) => ({ ...prev, ...newFilters }));
@@ -77,6 +93,7 @@ export function useActivities(
     error,
     filters,
     pagination,
+    stats,
     updateFilters,
     updatePagination,
     clearFilters,

@@ -53,4 +53,46 @@ export const activityService = {
   async getActivityById(id: string): Promise<Activity> {
     return apiFetch<Activity>(`${BASE_PATH}/${id}`, { requiresAuth: true });
   },
+
+  /**
+   * Get activity stats (counts by type) - unfiltered
+   */
+  async getActivityStats(): Promise<Record<string, number>> {
+    try {
+      const response = await apiFetch<Record<string, number>>(
+        `${BASE_PATH}/stats/counts`,
+        { requiresAuth: true }
+      );
+      return response;
+    } catch (err) {
+      // Fallback: fetch all activities without filters to calculate stats
+      console.warn("Stats endpoint not available, calculating from full activity list");
+      try {
+        const stats: Record<string, number> = {};
+        let page = 1;
+        let hasMore = true;
+
+        // Fetch all activities in batches and accumulate stats
+        while (hasMore) {
+          const allActivities = await this.getActivities({}, { page, limit: 100 });
+          
+          if (Array.isArray(allActivities.data)) {
+            allActivities.data.forEach((activity: any) => {
+              const type = activity.type;
+              stats[type] = (stats[type] || 0) + 1;
+            });
+          }
+
+          // Check if there are more pages
+          hasMore = page < (allActivities.totalPages || 0);
+          page++;
+        }
+
+        return stats;
+      } catch (fallbackErr) {
+        console.error("Failed to calculate activity stats:", fallbackErr);
+        return {};
+      }
+    }
+  },
 };
