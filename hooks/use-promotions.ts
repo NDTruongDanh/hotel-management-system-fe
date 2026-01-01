@@ -133,6 +133,8 @@ export function usePromotions(
         setLoading(false);
       }
     },
+    // Remove allPromotions from deps to avoid infinite loop
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [initialParams, showError]
   );
 
