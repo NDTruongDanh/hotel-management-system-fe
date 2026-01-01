@@ -256,7 +256,7 @@ export default function CustomersPage() {
       </div>
 
       {/* Search & Filters */}
-      <Card className="border-0 shadow-xl bg-gradient-to-br from-white via-slate-50 to-emerald-50/30">
+      <Card className="border-2 border-emerald-300 shadow-xl bg-gradient-to-br from-white via-slate-50 to-emerald-50/30">
         <CardContent className="p-6">
           <div className="flex flex-col md:flex-row gap-4">
             {/* Search */}
@@ -268,7 +268,7 @@ export default function CustomersPage() {
                 placeholder="Tìm kiếm theo tên, số điện thoại hoặc email..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-12 h-12 bg-white border-2 border-gray-200 hover:border-emerald-300 focus:border-emerald-500 transition-colors"
+                className="pl-12 h-12 bg-white border-2 border-transparent hover:border-emerald-300 focus:border-emerald-500 transition-colors"
               />
             </div>
 

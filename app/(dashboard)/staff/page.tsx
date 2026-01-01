@@ -11,14 +11,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
@@ -78,8 +70,20 @@ const getRoleBadgeColor = (role: EmployeeRole) => {
   }
 };
 
+// Mock avatar generator (will be replaced with real URLs from backend later)
+const getMockAvatar = (name: string, role: EmployeeRole) => {
+  const seed = name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  const avatarStyles = [
+    `https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}`,
+    `https://api.dicebear.com/7.x/personas/svg?seed=${seed}`,
+    `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random&size=200`,
+  ];
+  return avatarStyles[seed % avatarStyles.length];
+};
+
 export default function StaffPageNew() {
   const [employees, setEmployees] = useState<Employee[]>([]);
+  const [allEmployees, setAllEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState<EmployeeRole | "ALL">("ALL");
@@ -93,7 +97,15 @@ export default function StaffPageNew() {
   const loadEmployees = async () => {
     setLoading(true);
     try {
-      const params: any = {
+      // Load ALL employees (for stats)
+      const allResponse = await employeeService.getEmployees({
+        page: 1,
+        limit: 100,
+      });
+      setAllEmployees(allResponse.data);
+
+      // Load filtered employees (for display)
+      const params: Record<string, number | string> = {
         page: 1,
         limit: 100,
       };
@@ -102,9 +114,10 @@ export default function StaffPageNew() {
 
       const response = await employeeService.getEmployees(params);
       setEmployees(response.data);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "Vui lòng thử lại sau";
       toast.error("Không thể tải danh sách nhân viên", {
-        description: error.message || "Vui lòng thử lại sau",
+        description: errorMessage,
       });
     } finally {
       setLoading(false);
@@ -139,8 +152,9 @@ export default function StaffPageNew() {
         toast.success("Tạo nhân viên mới thành công");
       }
       loadEmployees();
-    } catch (error: any) {
-      throw new Error(error.message || "Không thể lưu nhân viên");
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "Không thể lưu nhân viên";
+      throw new Error(errorMessage);
     }
   };
 
@@ -159,22 +173,23 @@ export default function StaffPageNew() {
       toast.success("Xóa nhân viên thành công");
       loadEmployees();
       setDeleteDialogOpen(false);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "Nhân viên có thể đang có lịch sử giao dịch";
       toast.error("Không thể xóa nhân viên", {
-        description: error.message || "Nhân viên có thể đang có lịch sử giao dịch",
+        description: errorMessage,
       });
     } finally {
       setIsDeleting(false);
     }
   };
 
-  // Statistics
+  // Statistics - Always use ALL employees (not filtered)
   const stats = {
-    total: employees.length,
-    admin: employees.filter((e) => e.role === "ADMIN").length,
-    receptionist: employees.filter((e) => e.role === "RECEPTIONIST").length,
-    housekeeping: employees.filter((e) => e.role === "HOUSEKEEPING").length,
-    staff: employees.filter((e) => e.role === "STAFF").length,
+    total: allEmployees.length,
+    admin: allEmployees.filter((e) => e.role === "ADMIN").length,
+    receptionist: allEmployees.filter((e) => e.role === "RECEPTIONIST").length,
+    housekeeping: allEmployees.filter((e) => e.role === "HOUSEKEEPING").length,
+    staff: allEmployees.filter((e) => e.role === "STAFF").length,
   };
 
   const hasFilters = searchQuery || roleFilter !== "ALL";
@@ -293,7 +308,7 @@ export default function StaffPageNew() {
       </div>
 
       {/* Search & Filters */}
-      <Card className="border-0 shadow-xl bg-gradient-to-br from-white via-slate-50 to-blue-50/30">
+      <Card className="border-2 border-blue-300 shadow-xl bg-gradient-to-br from-white via-slate-50 to-blue-50/30">
         <CardContent className="p-6">
           <div className="flex flex-col md:flex-row gap-4">
             {/* Search */}
@@ -305,13 +320,13 @@ export default function StaffPageNew() {
                 placeholder="Tìm kiếm theo tên hoặc tên đăng nhập..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-12 h-12 bg-white border-2 border-gray-200 hover:border-blue-300 focus:border-blue-500"
+                className="pl-12 h-12 bg-white border-2 border-transparent hover:border-blue-300 focus:border-blue-500 transition-colors shadow-sm"
               />
             </div>
 
             {/* Role Filter */}
             <Select value={roleFilter} onValueChange={(value) => setRoleFilter(value as EmployeeRole | "ALL")}>
-              <SelectTrigger className="w-full md:w-[250px] h-12 bg-white border-2 border-gray-200 hover:border-blue-300">
+              <SelectTrigger className="w-full md:w-[250px] h-12 bg-white border-2 border-transparent hover:border-purple-300 focus:border-purple-500 transition-colors shadow-sm">
                 <SelectValue placeholder="Lọc theo vai trò" />
               </SelectTrigger>
               <SelectContent>
@@ -353,60 +368,71 @@ export default function StaffPageNew() {
         </CardContent>
       </Card>
 
-      {/* Table */}
-      <Card className="border-0 shadow-xl">
-        <CardContent className="p-0">
-          {loading ? (
-            <div className="flex flex-col items-center justify-center py-20">
-              <Loader2 className="h-16 w-16 animate-spin text-blue-600 mb-4" />
-              <p className="text-gray-600">Đang tải danh sách nhân viên...</p>
-            </div>
-          ) : employees.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-20">
-              <AlertCircle className="h-16 w-16 text-gray-400 mb-4" />
-              <h3 className="text-xl font-bold text-gray-900 mb-2">
-                {hasFilters ? "Không tìm thấy kết quả" : "Chưa có nhân viên"}
-              </h3>
-              <p className="text-gray-600 mb-6">
-                {hasFilters
-                  ? "Thử thay đổi bộ lọc để xem kết quả khác"
-                  : "Thêm nhân viên đầu tiên để bắt đầu"}
-              </p>
-              {!hasFilters && (
-                <Button onClick={handleAddNew} className="bg-gradient-to-r from-blue-600 to-cyan-600">
-                  <Plus className="mr-2 h-4 w-4" />
-                  Thêm nhân viên
-                </Button>
-              )}
-            </div>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-gray-50">
-                  <TableHead className="font-bold">Tên nhân viên</TableHead>
-                  <TableHead className="font-bold">Tên đăng nhập</TableHead>
-                  <TableHead className="font-bold">Vai trò</TableHead>
-                  <TableHead className="font-bold">Cập nhật lần cuối</TableHead>
-                  <TableHead className="text-right font-bold">Thao tác</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {employees.map((employee) => (
-                  <TableRow key={employee.id} className="hover:bg-blue-50/50 transition-colors">
-                    <TableCell className="font-medium">{employee.name}</TableCell>
-                    <TableCell className="text-gray-600">{employee.username}</TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className={getRoleBadgeColor(employee.role)}>
-                        {roleOptions.find(r => r.value === employee.role)?.label}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-gray-600">
-                      {new Date(employee.updatedAt).toLocaleDateString("vi-VN")}
-                    </TableCell>
-                    <TableCell className="text-right">
+      {/* Employee Cards Grid */}
+      <div>
+        {loading ? (
+          <div className="flex flex-col items-center justify-center py-20">
+            <Loader2 className="h-16 w-16 animate-spin text-blue-600 mb-4" />
+            <p className="text-gray-600">Đang tải danh sách nhân viên...</p>
+          </div>
+        ) : employees.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-20">
+            <AlertCircle className="h-16 w-16 text-gray-400 mb-4" />
+            <h3 className="text-xl font-bold text-gray-900 mb-2">
+              {hasFilters ? "Không tìm thấy kết quả" : "Chưa có nhân viên"}
+            </h3>
+            <p className="text-gray-600 mb-6">
+              {hasFilters
+                ? "Thử thay đổi bộ lọc để xem kết quả khác"
+                : "Thêm nhân viên đầu tiên để bắt đầu"}
+            </p>
+            {!hasFilters && (
+              <Button onClick={handleAddNew} className="bg-gradient-to-r from-blue-600 to-cyan-600">
+                <Plus className="mr-2 h-4 w-4" />
+                Thêm nhân viên
+              </Button>
+            )}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {employees.map((employee) => {
+              const avatarUrl = getMockAvatar(employee.name, employee.role);
+              const roleOption = roleOptions.find(r => r.value === employee.role);
+              
+              return (
+                <div
+                  key={employee.id}
+                  className="group relative bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1"
+                >
+                  {/* Gradient Background */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-cyan-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+
+                  {/* Card Content */}
+                  <div className="relative p-6 space-y-4">
+                    {/* Header with Avatar */}
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-4 flex-1">
+                        <div className="relative h-16 w-16 rounded-full overflow-hidden shadow-lg ring-4 ring-white group-hover:ring-blue-100 transition-all">
+                          <img
+                            src={avatarUrl}
+                            alt={employee.name}
+                            className="h-full w-full object-cover"
+                          />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-lg font-bold text-gray-900 truncate group-hover:text-blue-600 transition-colors">
+                            {employee.name}
+                          </h3>
+                          <p className="text-sm text-gray-500 font-medium mt-1">
+                            @{employee.username}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Actions Menu */}
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm">
+                          <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity">
                             <MoreVertical className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
@@ -424,14 +450,33 @@ export default function StaffPageNew() {
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
+                    </div>
+
+                    {/* Role Badge */}
+                    <div className="flex items-center justify-center pt-2">
+                      <Badge 
+                        variant="outline" 
+                        className={`${getRoleBadgeColor(employee.role)} px-4 py-2 text-sm font-bold uppercase tracking-wide`}
+                      >
+                        <div className={`h-2 w-2 rounded-full ${roleOption?.color} mr-2`} />
+                        {roleOption?.label}
+                      </Badge>
+                    </div>
+
+                    {/* Update Date */}
+                    <div className="pt-2 border-t border-gray-200">
+                      <div className="flex items-center justify-center gap-2 text-xs text-gray-500">
+                        <span className="font-semibold">Cập nhật:</span>
+                        <span>{new Date(employee.updatedAt).toLocaleDateString("vi-VN")}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
 
       {/* Employee Form Modal */}
       <EmployeeFormModal
