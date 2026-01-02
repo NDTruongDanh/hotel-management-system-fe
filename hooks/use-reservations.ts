@@ -23,17 +23,19 @@ type ViewMode = "calendar" | "list";
 function convertBookingToReservation(booking: Booking): Reservation {
   const checkInDate = new Date(booking.checkInDate);
   const checkOutDate = new Date(booking.checkOutDate);
-  const numberOfNights = Math.ceil((checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24));
-  
+  const numberOfNights = Math.ceil(
+    (checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24)
+  );
+
   // Map booking status to reservation status
   const statusMap: Record<string, ReservationStatus> = {
-    'PENDING': 'Chờ xác nhận',
-    'CONFIRMED': 'Đã xác nhận',
-    'CHECKED_IN': 'Đã nhận phòng',
-    'CHECKED_OUT': 'Đã trả phòng',
-    'CANCELLED': 'Đã hủy',
+    PENDING: "Chờ xác nhận",
+    CONFIRMED: "Đã xác nhận",
+    CHECKED_IN: "Đã nhận phòng",
+    CHECKED_OUT: "Đã trả phòng",
+    CANCELLED: "Đã hủy",
   };
-  
+
   return {
     reservationID: booking.id,
     customerID: booking.primaryCustomerId,
@@ -54,31 +56,42 @@ function convertBookingToReservation(booking: Booking): Reservation {
       roomName: br.room?.roomNumber || "Room",
       roomTypeID: br.roomTypeId,
       roomTypeName: br.roomType?.name || "Standard",
-      checkInDate: checkInDate.toISOString().split('T')[0],
-      checkOutDate: checkOutDate.toISOString().split('T')[0],
-      status: statusMap[booking.status] || 'Chờ xác nhận',
-      numberOfGuests: Math.ceil(booking.totalGuests / (booking.bookingRooms?.length || 1)),
-      pricePerNight: parseInt(booking.totalAmount || "0") / numberOfNights / (booking.bookingRooms?.length || 1),
+      checkInDate: checkInDate.toISOString().split("T")[0],
+      checkOutDate: checkOutDate.toISOString().split("T")[0],
+      status: statusMap[booking.status] || "Chờ xác nhận",
+      numberOfGuests: Math.ceil(
+        booking.totalGuests / (booking.bookingRooms?.length || 1)
+      ),
+      pricePerNight:
+        parseInt(booking.totalAmount || "0") /
+        numberOfNights /
+        (booking.bookingRooms?.length || 1),
     })),
     totalAmount: parseInt(booking.totalAmount || "0"),
     depositAmount: parseInt(booking.depositRequired || "0"),
-    status: statusMap[booking.status] || 'Chờ xác nhận',
+    status: statusMap[booking.status] || "Chờ xác nhận",
   };
 }
 
 export function useReservations() {
   const [viewMode, setViewMode] = useState<ViewMode>("calendar");
-  const [reservations, setReservations] = useState<Reservation[]>(mockReservations);
+  const [reservations, setReservations] =
+    useState<Reservation[]>(mockReservations);
 
   // Load bookings from backend on mount
   useEffect(() => {
     const loadBookings = async () => {
       try {
-        const bookings = await bookingService.getAllBookings();
-        if (bookings && bookings.length > 0) {
+        const response = await bookingService.getAllBookings();
+        const bookings = response.data || [];
+        if (bookings.length > 0) {
           const converted = bookings.map(convertBookingToReservation);
           setReservations(converted);
           logger.log("Loaded bookings from backend:", converted);
+        } else {
+          // Use mock data if no bookings returned
+          logger.log("No bookings from API, using mock data");
+          setReservations(mockReservations);
         }
       } catch (error) {
         logger.error("Failed to load bookings:", error);
@@ -101,7 +114,8 @@ export function useReservations() {
   // Modal states
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
-  const [isAvailableRoomsModalOpen, setIsAvailableRoomsModalOpen] = useState(false);
+  const [isAvailableRoomsModalOpen, setIsAvailableRoomsModalOpen] =
+    useState(false);
   const [availableRooms, setAvailableRooms] = useState<Room[]>([]);
   const [selectedReservation, setSelectedReservation] =
     useState<Reservation | null>(null);
@@ -145,7 +159,11 @@ export function useReservations() {
   }, [filteredReservations]);
 
   // Handle search for available rooms (Find tab)
-  const handleSearch = (findCheckInDate: string, findCheckOutDate: string, findRoomType: string) => {
+  const handleSearch = async (
+    findCheckInDate: string,
+    findCheckOutDate: string,
+    findRoomType: string
+  ) => {
     if (!findCheckInDate || !findCheckOutDate) {
       alert("Vui lòng chọn ngày đến và ngày đi!");
       return;
@@ -157,14 +175,50 @@ export function useReservations() {
       roomTypeFilter: findRoomType,
     });
 
-    // Search available rooms
-    const rooms = searchAvailableRooms(
-      findCheckInDate,
-      findCheckOutDate,
-      findRoomType !== "Tất cả" ? findRoomType : undefined
-    );
+    try {
+      // Try API first
+      const apiRooms = await bookingService.getAvailableRooms({
+        checkInDate: findCheckInDate,
+        checkOutDate: findCheckOutDate,
+        roomTypeId: findRoomType !== "Tất cả" ? findRoomType : undefined,
+      });
 
-    setAvailableRooms(rooms);
+      if (apiRooms.length > 0) {
+        // Convert API rooms to local Room type
+        const convertedRooms: Room[] = apiRooms.map((r) => ({
+          roomID: r.id,
+          roomName: r.roomNumber,
+          roomTypeID: r.roomType.id,
+          roomType: {
+            roomTypeID: r.roomType.id,
+            roomTypeName: r.roomType.name,
+            price: parseInt(r.roomType.pricePerNight),
+            capacity: r.roomType.capacity,
+          },
+          roomStatus: "Sẵn sàng" as const,
+          floor: r.floor,
+        }));
+        setAvailableRooms(convertedRooms);
+      } else {
+        // Fallback to mock
+        const mockRooms = searchAvailableRooms(
+          findCheckInDate,
+          findCheckOutDate,
+          findRoomType !== "Tất cả" ? findRoomType : undefined
+        );
+        setAvailableRooms(mockRooms);
+      }
+    } catch (error) {
+      logger.error("API room search failed, using mock:", error);
+      // Fallback to mock search
+      const rooms = searchAvailableRooms(
+        findCheckInDate,
+        findCheckOutDate,
+        findRoomType !== "Tất cả" ? findRoomType : undefined
+      );
+      setAvailableRooms(rooms);
+    }
+
     setIsAvailableRoomsModalOpen(true);
   };
 
@@ -228,9 +282,23 @@ export function useReservations() {
     setIsCancelModalOpen(true);
   };
 
-  const handleConfirmCancel = () => {
+  const handleConfirmCancel = async () => {
     if (selectedReservation) {
-      // Update reservation status
+      try {
+        // Call cancel API
+        await bookingService.cancelBooking(
+          selectedReservation.reservationID,
+          "Hủy theo yêu cầu"
+        );
+        logger.log(
+          "Booking cancelled via API:",
+          selectedReservation.reservationID
+        );
+      } catch (error) {
+        logger.error("Cancel API failed, updating local state:", error);
+      }
+
+      // Update local state regardless of API success (mock fallback in service)
       setReservations((prev) =>
         prev.map((r) =>
           r.reservationID === selectedReservation.reservationID
@@ -257,18 +325,23 @@ export function useReservations() {
       try {
         // Transform to backend-compatible CreateBookingRequest
         const createBookingRequest: CreateBookingRequest = {
-          rooms: roomSelections.map(sel => ({
+          rooms: roomSelections.map((sel) => ({
             roomTypeId: sel.roomTypeID,
-            count: sel.quantity
+            count: sel.quantity,
           })),
           checkInDate: data.checkInDate,
           checkOutDate: data.checkOutDate,
-          totalGuests: roomSelections.reduce((sum, sel) => sum + sel.numberOfGuests, 0)
+          totalGuests: roomSelections.reduce(
+            (sum, sel) => sum + sel.numberOfGuests,
+            0
+          ),
         };
 
         // Call real backend API
-        const response = await bookingService.createBooking(createBookingRequest);
-        
+        const response = await bookingService.createBooking(
+          createBookingRequest
+        );
+
         logger.log("Booking created successfully:", response);
 
         // Update local state with mock data for now (in real app, fetch from backend)
@@ -295,10 +368,9 @@ export function useReservations() {
               3,
               "0"
             )}_${detailCounter++}`,
-            reservationID: response.bookingCode || `DP${String(reservations.length + 1).padStart(
-              3,
-              "0"
-            )}`,
+            reservationID:
+              response.bookingCode ||
+              `DP${String(reservations.length + 1).padStart(3, "0")}`,
             roomID: `P${selection.roomTypeID}_${index + 1}`, // Mock room ID
             roomName: `${selection.roomTypeName} ${index + 1}`,
             roomTypeID: selection.roomTypeID,
@@ -312,7 +384,9 @@ export function useReservations() {
         });
 
         const newReservation: Reservation = {
-          reservationID: response.bookingCode || `DP${String(reservations.length + 1).padStart(3, "0")}`,
+          reservationID:
+            response.bookingCode ||
+            `DP${String(reservations.length + 1).padStart(3, "0")}`,
           customerID: `KH${String(reservations.length + 1).padStart(3, "0")}`,
           customer: {
             customerID: `KH${String(reservations.length + 1).padStart(3, "0")}`,

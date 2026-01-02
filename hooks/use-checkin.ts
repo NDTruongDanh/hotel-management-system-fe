@@ -1,7 +1,10 @@
 import { logger } from "@/lib/utils/logger";
 import { useState } from "react";
 import type { Booking } from "@/lib/types/api";
-import type { WalkInFormData, BackendCheckInRequest } from "@/lib/types/checkin-checkout";
+import type {
+  WalkInFormData,
+  BackendCheckInRequest,
+} from "@/lib/types/checkin-checkout";
 import { bookingService } from "@/lib/services/booking.service";
 
 export function useCheckIn() {
@@ -19,7 +22,9 @@ export function useCheckIn() {
       // Call backend API to search confirmed bookings
       const searchResults = await bookingService.searchBookings(searchQuery);
       // Filter for CONFIRMED bookings only (ready for check-in)
-      const confirmedBookings = searchResults.filter(b => b.status === 'CONFIRMED');
+      const confirmedBookings = searchResults.filter(
+        (b) => b.status === "CONFIRMED"
+      );
       setResults(confirmedBookings);
     } catch (error) {
       logger.error("Search failed:", error);
@@ -39,13 +44,11 @@ export function useCheckIn() {
     try {
       // Call real backend API
       const response = await bookingService.checkIn(data);
-      
+
       logger.log("Check-in successful:", response);
 
       // Remove from results after successful check-in
-      setResults((prev) =>
-        prev.filter((b) => b.id !== selectedBooking?.id)
-      );
+      setResults((prev) => prev.filter((b) => b.id !== selectedBooking?.id));
 
       // Reset modal
       setShowModal(false);
@@ -68,11 +71,10 @@ export function useCheckIn() {
     setIsLoading(true);
     try {
       logger.log("Walk-in check-in data:", data);
-      
+
       // TODO: Implement walk-in booking creation + immediate check-in
       // const booking = await bookingService.createBooking(...);
       // const checkin = await bookingService.checkIn(...);
-      
     } catch (error) {
       logger.error("Walk-in check-in failed:", error);
       throw error;

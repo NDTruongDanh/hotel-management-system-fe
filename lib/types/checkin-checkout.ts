@@ -94,7 +94,7 @@ export interface BackendCheckInRequest {
   }>;
 }
 
-// Check-out Form Data - Updated to match backend structure  
+// Check-out Form Data - Updated to match backend structure
 export interface CheckOutFormData {
   bookingRoomIds: string[];
   notes?: string;
@@ -137,4 +137,83 @@ export interface AddPenaltyFormData {
   description: string;
   amount: number;
   notes?: string;
+}
+
+// ============================================================================
+// API Types (from swagger.json)
+// ============================================================================
+
+/**
+ * Service Usage Request
+ * POST /employee/service/service-usage
+ */
+export interface ServiceUsageRequest {
+  bookingId?: string;
+  bookingRoomId?: string;
+  serviceId: string;
+  quantity: number;
+}
+
+/**
+ * Service Usage Response
+ */
+export interface ServiceUsageResponse {
+  id: string;
+  bookingId?: string;
+  bookingRoomId?: string;
+  serviceId: string;
+  quantity: number;
+  status: "PENDING" | "COMPLETED" | "CANCELLED";
+  totalPrice: string;
+  createdAt: string;
+  updatedAt: string;
+  service?: {
+    id: string;
+    name: string;
+    price: string;
+    unit: string;
+  };
+}
+
+/**
+ * Update Service Usage Request
+ * PATCH /employee/service/service-usage/{id}
+ */
+export interface UpdateServiceUsageRequest {
+  quantity?: number;
+  status?: "PENDING" | "COMPLETED" | "CANCELLED";
+}
+
+// ============================================================================
+// Walk-in Booking Types (Missing API - documented in Missing_API_endpoints.md)
+// ============================================================================
+
+/**
+ * Walk-in Booking Request
+ * POST /employee/bookings/walk-in
+ */
+export interface WalkInBookingRequest {
+  customer: {
+    fullName: string;
+    phone: string;
+    idNumber?: string;
+    email?: string;
+    address?: string;
+  };
+  roomId: string;
+  checkInDate: string;
+  checkOutDate: string;
+  totalGuests: number;
+  notes?: string;
+}
+
+/**
+ * Walk-in Booking Response
+ */
+export interface WalkInBookingResponse {
+  bookingId: string;
+  bookingCode: string;
+  bookingRoomId: string;
+  status: "CHECKED_IN";
+  message?: string;
 }

@@ -6,20 +6,27 @@ import type {
   AddServiceFormData,
   AddPenaltyFormData,
   CheckOutFormData,
+  ServiceUsageResponse,
 } from "@/lib/types/checkin-checkout";
 import type { AddSurchargeFormData } from "@/components/checkin-checkout/add-surcharge-modal";
 import { bookingService } from "@/lib/services/booking.service";
+import { checkinCheckoutService } from "@/lib/services/checkin-checkout.service";
 
 export function useCheckOut() {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<Booking[]>([]);
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
-  const [selectedBookingRooms, setSelectedBookingRooms] = useState<BookingRoom[]>([]);
+  const [selectedBookingRooms, setSelectedBookingRooms] = useState<
+    BookingRoom[]
+  >([]);
   const [showAddServiceModal, setShowAddServiceModal] = useState(false);
   const [showAddPenaltyModal, setShowAddPenaltyModal] = useState(false);
   const [showAddSurchargeModal, setShowAddSurchargeModal] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [serviceUsages, setServiceUsages] = useState<ServiceUsageResponse[]>(
+    []
+  );
 
   const handleSearch = async (searchQuery: string) => {
     setQuery(searchQuery);
@@ -28,7 +35,9 @@ export function useCheckOut() {
       // Call backend API to search checked-in bookings
       const searchResults = await bookingService.searchBookings(searchQuery);
       // Filter for CHECKED_IN bookings only (ready for check-out)
-      const checkedInBookings = searchResults.filter(b => b.status === 'CHECKED_IN');
+      const checkedInBookings = searchResults.filter(
+        (b) => b.status === "CHECKED_IN"
+      );
       setResults(checkedInBookings);
     } catch (error) {
       logger.error("Search failed:", error);
@@ -41,7 +50,9 @@ export function useCheckOut() {
   const handleSelectBooking = (booking: Booking) => {
     setSelectedBooking(booking);
     // Get booking rooms that are OCCUPIED (not yet checked out)
-    const occupiedRooms = (booking.bookingRooms || []).filter(br => br.room?.status === 'OCCUPIED');
+    const occupiedRooms = (booking.bookingRooms || []).filter(
+      (br) => br.room?.status === "OCCUPIED"
+    );
     setSelectedBookingRooms(occupiedRooms);
   };
 
@@ -50,11 +61,32 @@ export function useCheckOut() {
     setSelectedBookingRooms([]);
   };
 
-  const handleAddService = (data: AddServiceFormData): string => {
-    if (!selectedBooking) return "";
-    logger.log("Add service:", data);
-    // TODO: Implement service addition to booking
-    return "";
+  const handleAddService = async (
+    data: AddServiceFormData
+  ): Promise<string> => {
+    if (!selectedBooking || selectedBookingRooms.length === 0) return "";
+
+    try {
+      // Use the first selected booking room for service usage
+      const bookingRoomId = selectedBookingRooms[0].id;
+
+      const response = await checkinCheckoutService.addServiceUsage({
+        bookingId: selectedBooking.id,
+        bookingRoomId: bookingRoomId,
+        serviceId: data.serviceID,
+        quantity: data.quantity,
+      });
+
+      logger.log("Service usage added:", response);
+
+      // Track service usage locally
+      setServiceUsages((prev) => [...prev, response]);
+
+      return response.service?.name || "Service";
+    } catch (error) {
+      logger.error("Failed to add service:", error);
+      throw error;
+    }
   };
 
   const handleAddPenalty = (data: AddPenaltyFormData): boolean => {
@@ -76,7 +108,9 @@ export function useCheckOut() {
     setShowPaymentModal(true);
   };
 
-  const handleConfirmPayment = async (method: PaymentMethod): Promise<string> => {
+  const handleConfirmPayment = async (
+    method: PaymentMethod
+  ): Promise<string> => {
     if (!selectedBooking || selectedBookingRooms.length === 0) return "";
 
     setIsLoading(true);
@@ -84,25 +118,25 @@ export function useCheckOut() {
       logger.log("Confirm payment with method:", method);
 
       const checkoutData: CheckOutFormData = {
-        bookingRoomIds: selectedBookingRooms.map(br => br.id),
-        notes: `Checked out with payment method: ${method}`
+        bookingRoomIds: selectedBookingRooms.map((br) => br.id),
+        notes: `Checked out with payment method: ${method}`,
       };
 
       // Call real backend API
       const response = await bookingService.checkOut(checkoutData);
-      
+
       logger.log("Check-out successful:", response);
 
-      const roomName = selectedBookingRooms.map(br => br.room?.roomNumber).join(", ");
-      
+      const roomName = selectedBookingRooms
+        .map((br) => br.room?.roomNumber)
+        .join(", ");
+
       // Remove from results and reset selected checkout
-      setResults((prev) =>
-        prev.filter((b) => b.id !== selectedBooking.id)
-      );
+      setResults((prev) => prev.filter((b) => b.id !== selectedBooking.id));
       setSelectedBooking(null);
       setSelectedBookingRooms([]);
       setShowPaymentModal(false);
-      
+
       return roomName;
     } catch (error) {
       logger.error("Check-out failed:", error);
@@ -117,6 +151,7 @@ export function useCheckOut() {
     results,
     selectedBooking,
     selectedBookingRooms,
+    serviceUsages,
     showAddServiceModal,
     showAddPenaltyModal,
     showAddSurchargeModal,

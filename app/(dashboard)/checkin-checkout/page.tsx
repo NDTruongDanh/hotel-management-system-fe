@@ -41,12 +41,16 @@ export default function CheckinCheckoutPage() {
   };
 
   // Check-out handlers
-  const handleAddService = (
+  const handleAddService = async (
     data: Parameters<typeof checkOut.handleAddService>[0]
   ) => {
-    const serviceName = checkOut.handleAddService(data);
-    if (serviceName) {
-      notification.showSuccess(`Đã thêm dịch vụ ${serviceName}!`);
+    try {
+      const serviceName = await checkOut.handleAddService(data);
+      if (serviceName) {
+        notification.showSuccess(`Đã thêm dịch vụ ${serviceName}!`);
+      }
+    } catch {
+      notification.showSuccess("Không thể thêm dịch vụ. Vui lòng thử lại.");
     }
   };
 
@@ -113,15 +117,15 @@ export default function CheckinCheckoutPage() {
       <Tabs defaultValue="checkin" className="space-y-6">
         <div className="flex justify-center">
           <TabsList className="inline-flex h-16 items-center justify-center rounded-2xl bg-linear-to-br from-white via-gray-50 to-white p-1.5 shadow-lg border-2 border-gray-200/50">
-            <TabsTrigger 
-              value="checkin" 
+            <TabsTrigger
+              value="checkin"
               className="gap-3 h-full px-8 rounded-xl data-[state=active]:bg-linear-to-br data-[state=active]:from-primary-600 data-[state=active]:to-primary-500 data-[state=active]:shadow-lg data-[state=active]:text-white font-bold text-base transition-all hover:scale-105"
             >
               <span className="w-5 h-5">{ICONS.CALENDAR_CHECK}</span>
               Check-in
             </TabsTrigger>
-            <TabsTrigger 
-              value="checkout" 
+            <TabsTrigger
+              value="checkout"
               className="gap-3 h-full px-8 rounded-xl data-[state=active]:bg-linear-to-br data-[state=active]:from-primary-600 data-[state=active]:to-primary-500 data-[state=active]:shadow-lg data-[state=active]:text-white font-bold text-base transition-all hover:scale-105"
             >
               <span className="w-5 h-5">{ICONS.DOOR_OPEN}</span>
@@ -184,9 +188,17 @@ export default function CheckinCheckoutPage() {
       <WalkInModal
         open={checkIn.showWalkInModal}
         onOpenChange={checkIn.setShowWalkInModal}
-        onConfirm={(data) => {
-          checkIn.handleConfirmWalkIn(data);
-          notification.showSuccess(`Đã check-in thành công cho khách vãng lai ${data.customerName}!`);
+        onConfirm={async (data) => {
+          try {
+            const result = await checkIn.handleConfirmWalkIn(data);
+            notification.showSuccess(
+              `Đã check-in thành công cho ${result.customerName} vào phòng ${result.roomNumber} (${result.bookingCode})!`
+            );
+          } catch {
+            notification.showSuccess(
+              `Không thể check-in khách vãng lai ${data.customerName}. Vui lòng thử lại.`
+            );
+          }
         }}
       />
 
@@ -218,4 +230,3 @@ export default function CheckinCheckoutPage() {
     </div>
   );
 }
-

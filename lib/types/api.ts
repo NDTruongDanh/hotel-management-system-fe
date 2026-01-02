@@ -466,4 +466,68 @@ export interface Booking {
   updatedAt: string;
   primaryCustomer?: Customer;
   bookingRooms?: BookingRoom[];
+  cancelledAt?: string;
+  cancelReason?: string;
+  confirmedAt?: string;
+}
+
+// ============================================================================
+// Booking List & Filter Types
+// ============================================================================
+
+export interface GetBookingsParams {
+  page?: number;
+  limit?: number;
+  status?: BookingStatus;
+  checkInDate?: string;
+  checkOutDate?: string;
+  roomTypeId?: string;
+  search?: string;
+  sortBy?: "createdAt" | "checkInDate" | "checkOutDate" | "status";
+  sortOrder?: "asc" | "desc";
+}
+
+export interface CreateBookingEmployeeRequest {
+  customerId: string;
+  rooms: Array<{
+    roomTypeId: string;
+    count: number;
+  }>;
+  checkInDate: string;
+  checkOutDate: string;
+  totalGuests: number;
+  notes?: string;
+}
+
+export interface CancelBookingRequest {
+  reason?: string;
+}
+
+export interface CancelBookingResponse {
+  id: string;
+  bookingCode: string;
+  status: "CANCELLED";
+  cancelledAt: string;
+  cancelReason?: string;
+}
+
+export interface ConfirmBookingResponse {
+  id: string;
+  bookingCode: string;
+  status: "CONFIRMED";
+  confirmedAt: string;
+}
+
+export interface AvailableRoomSearchParams {
+  checkInDate: string;
+  checkOutDate: string;
+  roomTypeId?: string;
+}
+
+export interface AvailableRoom {
+  id: string;
+  roomNumber: string;
+  floor: number;
+  status: RoomStatus;
+  roomType: RoomType;
 }
