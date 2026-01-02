@@ -323,14 +323,58 @@ export function useReservations() {
       }
 
       try {
+        // Get dates from first room selection (all rooms may have different dates)
+        // For API, we use the earliest check-in and latest check-out
+        const allCheckIns = roomSelections
+          .map((s) => s.checkInDate)
+          .filter(Boolean);
+        const allCheckOuts = roomSelections
+          .map((s) => s.checkOutDate)
+          .filter(Boolean);
+
+        if (allCheckIns.length === 0 || allCheckOuts.length === 0) {
+          logger.error("No dates found in room selections");
+          return;
+        }
+
+        // Use first room's dates (or earliest/latest if needed)
+        const checkInDateStr = allCheckIns[0];
+        const checkOutDateStr = allCheckOuts[0];
+
+        // Convert dates to ISO 8601 format
+        // Parse the date and set appropriate times (check-in at 14:00, check-out at 12:00)
+        const parseToISO = (dateStr: string, hours: number): string => {
+          // Handle both "YYYY-MM-DD" and ISO formats
+          const [year, month, day] = dateStr.split("-").map(Number);
+          if (year && month && day) {
+            const d = new Date(Date.UTC(year, month - 1, day, hours, 0, 0));
+            return d.toISOString();
+          }
+          // Fallback: try parsing as-is
+          const date = new Date(dateStr);
+          date.setUTCHours(hours, 0, 0, 0);
+          return date.toISOString();
+        };
+
+        const checkInISO = parseToISO(checkInDateStr, 14);
+        const checkOutISO = parseToISO(checkOutDateStr, 12);
+
         // Transform to backend-compatible CreateBookingRequest
         const createBookingRequest: CreateBookingRequest = {
+          // Include customer info for new booking (required by backend)
+          customer: {
+            fullName: data.customerName,
+            phone: data.phoneNumber,
+            idNumber: data.identityCard,
+            email: data.email,
+            address: data.address,
+          },
           rooms: roomSelections.map((sel) => ({
             roomTypeId: sel.roomTypeID,
             count: sel.quantity,
           })),
-          checkInDate: data.checkInDate,
-          checkOutDate: data.checkOutDate,
+          checkInDate: checkInISO,
+          checkOutDate: checkOutISO,
           totalGuests: roomSelections.reduce(
             (sum, sel) => sum + sel.numberOfGuests,
             0
@@ -345,24 +389,30 @@ export function useReservations() {
         logger.log("Booking created successfully:", response);
 
         // Update local state with mock data for now (in real app, fetch from backend)
-        // Calculate total rooms and amount
+        // Calculate total rooms
         const totalRooms = roomSelections.reduce(
           (sum, sel) => sum + sel.quantity,
           0
         );
-        const checkIn = new Date(data.checkInDate);
-        const checkOut = new Date(data.checkOutDate);
-        const nights = Math.ceil(
-          (checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24)
-        );
 
+        // Calculate total amount properly based on each room's specific dates
         const totalAmount = roomSelections.reduce((sum, sel) => {
-          return sum + sel.pricePerNight * sel.quantity * nights;
+          if (!sel.checkInDate || !sel.checkOutDate) return sum;
+          const start = new Date(sel.checkInDate);
+          const end = new Date(sel.checkOutDate);
+          const n = Math.ceil(
+            (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)
+          );
+          return sum + sel.pricePerNight * sel.quantity * (n > 0 ? n : 0);
         }, 0);
 
         // Create details for each room
         let detailCounter = 1;
         const details = roomSelections.flatMap((selection) => {
+          // Use specific dates for this room selection
+          const selCheckIn = selection.checkInDate;
+          const selCheckOut = selection.checkOutDate;
+
           return Array.from({ length: selection.quantity }, (_, index) => ({
             detailID: `CTD${String(reservations.length + 1).padStart(
               3,
@@ -375,8 +425,8 @@ export function useReservations() {
             roomName: `${selection.roomTypeName} ${index + 1}`,
             roomTypeID: selection.roomTypeID,
             roomTypeName: selection.roomTypeName,
-            checkInDate: data.checkInDate,
-            checkOutDate: data.checkOutDate,
+            checkInDate: selCheckIn,
+            checkOutDate: selCheckOut,
             status: "Đã đặt" as ReservationStatus,
             numberOfGuests: selection.numberOfGuests,
             pricePerNight: selection.pricePerNight,

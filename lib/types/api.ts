@@ -384,12 +384,20 @@ export interface RoomRequest {
 }
 
 export interface CreateBookingRequest {
+  customerId?: string;
+  customer?: {
+    fullName: string;
+    phone: string;
+    idNumber?: string;
+    email?: string;
+    address?: string;
+  };
   rooms: Array<{
     roomTypeId: string;
     count: number;
   }>;
-  checkInDate: string;
-  checkOutDate: string;
+  checkInDate: string; // ISO 8601 format
+  checkOutDate: string; // ISO 8601 format
   totalGuests: number;
 }
 
@@ -487,14 +495,26 @@ export interface GetBookingsParams {
   sortOrder?: "asc" | "desc";
 }
 
+/**
+ * Employee-initiated booking request
+ * - Either customerId (existing customer) OR customer (new walk-in customer) required
+ * - checkInDate/checkOutDate must be in ISO 8601 format (e.g., "2025-01-15T14:00:00.000Z")
+ */
 export interface CreateBookingEmployeeRequest {
-  customerId: string;
+  customerId?: string;
+  customer?: {
+    fullName: string;
+    phone: string;
+    idNumber?: string;
+    email?: string;
+    address?: string;
+  };
   rooms: Array<{
     roomTypeId: string;
     count: number;
   }>;
-  checkInDate: string;
-  checkOutDate: string;
+  checkInDate: string; // ISO 8601 format
+  checkOutDate: string; // ISO 8601 format
   totalGuests: number;
   notes?: string;
 }
