@@ -9,17 +9,17 @@ import { PaymentImage } from "@/lib/types/api";
 class PaymentImageService {
   /**
    * Get all payment images for a booking
-   * GET /customer-api/v1/bookings/:bookingId/payment-images
+   * GET /employee/bookings/:bookingId/payment-images
    */
   async getPaymentImages(bookingId: string): Promise<PaymentImage[]> {
     return api.get<PaymentImage[]>(
-      `/customer-api/v1/bookings/${bookingId}/payment-images`
+      `/employee/bookings/${bookingId}/payment-images`
     );
   }
 
   /**
    * Upload a single payment image
-   * POST /customer-api/v1/bookings/:bookingId/payment-images
+   * POST /employee/bookings/:bookingId/payment-images
    */
   async uploadPaymentImage(
     bookingId: string,
@@ -42,14 +42,14 @@ class PaymentImageService {
     if (options?.description) formData.append("description", options.description);
 
     return api.post<PaymentImage>(
-      `/customer-api/v1/bookings/${bookingId}/payment-images`,
+      `/employee/bookings/${bookingId}/payment-images`,
       formData
     );
   }
 
   /**
    * Upload multiple payment images
-   * POST /customer-api/v1/bookings/:bookingId/payment-images/batch
+   * POST /employee/bookings/:bookingId/payment-images/batch
    */
   async uploadPaymentImagesBatch(
     bookingId: string,
@@ -67,17 +67,17 @@ class PaymentImageService {
     });
 
     return api.post(
-      `/customer-api/v1/bookings/${bookingId}/payment-images/batch`,
+      `/employee/bookings/${bookingId}/payment-images/batch`,
       formData
     );
   }
 
   /**
    * Delete a payment image
-   * DELETE /customer-api/v1/bookings/payment-images/:imageId
+   * DELETE /employee/bookings/payment-images/:imageId
    */
   async deletePaymentImage(imageId: string): Promise<void> {
-    return api.delete(`/customer-api/v1/bookings/payment-images/${imageId}`);
+    return api.delete(`/employee/bookings/payment-images/${imageId}`);
   }
 }
 
