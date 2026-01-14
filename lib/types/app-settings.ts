@@ -31,6 +31,10 @@ export interface DepositPercentageConfig {
   percentage: number; // 0-100, e.g., 50 = 50%
 }
 
+export interface PaymentQrCodeConfig {
+  base64: string; // Base64 encoded image string
+}
+
 export interface AppSetting {
   id: string;
   key: string;
@@ -44,6 +48,7 @@ export const APP_SETTING_KEYS = {
   CHECKIN_TIME: "checkin_time",
   CHECKOUT_TIME: "checkout_time",
   DEPOSIT_PERCENTAGE: "deposit_percentage",
+  PAYMENT_QR_CODE: "payment_qr_code",
 } as const;
 
 export type AppSettingKey =
@@ -57,4 +62,8 @@ export interface UpdateTimeConfigRequest {
 
 export interface UpdateDepositPercentageRequest {
   percentage: number;
+}
+
+export interface UpdatePaymentQrCodeRequest {
+  base64: string;
 }

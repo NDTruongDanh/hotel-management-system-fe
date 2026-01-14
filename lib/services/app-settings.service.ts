@@ -10,6 +10,8 @@ import type {
   CheckOutTimeConfig,
   UpdateTimeConfigRequest,
   UpdateDepositPercentageRequest,
+  PaymentQrCodeConfig,
+  UpdatePaymentQrCodeRequest,
 } from "@/lib/types/app-settings";
 
 const BASE_PATH = "/employee/app-settings";
@@ -118,5 +120,39 @@ export const appSettingsService = {
       }
     );
     return response.data.value.percentage;
+  },
+
+  /**
+   * Get payment QR code configuration
+   * GET /employee/app-settings/payment_qr_code
+   */
+  async getPaymentQrCode(): Promise<PaymentQrCodeConfig> {
+    const response = await apiFetch<{ 
+      data: { key: string; value: PaymentQrCodeConfig } 
+    }>(
+      `${BASE_PATH}/payment_qr_code`,
+      { requiresAuth: true }
+    );
+    return response.data.value;
+  },
+
+  /**
+   * Update payment QR code configuration
+   * PUT /employee/app-settings/payment_qr_code
+   */
+  async updatePaymentQrCode(
+    config: UpdatePaymentQrCodeRequest
+  ): Promise<PaymentQrCodeConfig> {
+    const response = await apiFetch<{ 
+      data: { key: string; value: PaymentQrCodeConfig } 
+    }>(
+      `${BASE_PATH}/payment_qr_code`,
+      {
+        method: "PUT",
+        body: JSON.stringify({ value: { base64: config.base64 } }),
+        requiresAuth: true,
+      }
+    );
+    return response.data.value;
   },
 };

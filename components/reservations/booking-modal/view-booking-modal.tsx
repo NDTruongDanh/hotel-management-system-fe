@@ -16,6 +16,9 @@ import { Separator } from "@/components/ui/separator";
 import { serviceUsageAPI } from "@/lib/services/service-unified.service";
 import { ServiceUsage } from "@/lib/types/service-unified";
 import { X } from "lucide-react";
+import { paymentImageService } from "@/lib/services/payment-image.service";
+import { PaymentImage } from "@/lib/types/api";
+import Image from "next/image";
 
 interface ViewBookingModalProps {
   isOpen: boolean;
@@ -30,6 +33,8 @@ export function ViewBookingModal({
 }: ViewBookingModalProps) {
   const [services, setServices] = useState<ServiceUsage[]>([]);
   const [loadingServices, setLoadingServices] = useState(false);
+  const [paymentImages, setPaymentImages] = useState<PaymentImage[]>([]);
+  const [loadingPaymentImages, setLoadingPaymentImages] = useState(false);
 
   useEffect(() => {
     if (isOpen && reservation) {
@@ -47,9 +52,26 @@ export function ViewBookingModal({
           setLoadingServices(false);
         }
       };
+
+      const fetchPaymentImages = async () => {
+        try {
+          setLoadingPaymentImages(true);
+          const images = await paymentImageService.getPaymentImages(
+            reservation.reservationID || reservation.id
+          );
+          setPaymentImages(images);
+        } catch (error) {
+          console.error("Failed to fetch payment images", error);
+        } finally {
+          setLoadingPaymentImages(false);
+        }
+      };
+
       fetchServices();
+      fetchPaymentImages();
     } else {
       setServices([]);
+      setPaymentImages([]);
     }
   }, [isOpen, reservation]);
 
@@ -350,6 +372,57 @@ export function ViewBookingModal({
                     </tr>
                   </tfoot>
                 </table>
+              </div>
+            )}
+          </div>
+
+          <Separator />
+
+          {/* Payment Images Section */}
+          <div>
+            <h3 className="font-semibold mb-3 flex items-center gap-2 text-blue-600">
+              {ICONS.CAMERA} Hình Ảnh Thanh Toán
+            </h3>
+            {loadingPaymentImages ? (
+              <div className="text-center py-4 text-gray-500">
+                Đang tải hình ảnh thanh toán...
+              </div>
+            ) : paymentImages.length === 0 ? (
+              <div className="text-center py-4 bg-gray-50 rounded border border-dashed text-gray-500 text-sm">
+                Chưa có hình ảnh thanh toán nào
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {paymentImages.map((image) => (
+                  <div
+                    key={image.id}
+                    className="group relative border rounded-lg overflow-hidden hover:shadow-lg transition-shadow"
+                  >
+                    <div className="relative aspect-square bg-gray-100">
+                      <Image
+                        src={image.secureUrl}
+                        alt={image.description || "Payment proof"}
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                      />
+                    </div>
+                    {(image.paymentMethod || image.description) && (
+                      <div className="p-2 bg-white">
+                        {image.paymentMethod && (
+                          <p className="text-xs font-medium text-gray-700 capitalize">
+                            {image.paymentMethod.replace("_", " ")}
+                          </p>
+                        )}
+                        {image.description && (
+                          <p className="text-xs text-gray-500 line-clamp-2 mt-1">
+                            {image.description}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                ))}
               </div>
             )}
           </div>

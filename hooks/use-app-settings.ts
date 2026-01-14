@@ -10,6 +10,8 @@ import type {
   CheckOutTimeConfig,
   UpdateTimeConfigRequest,
   UpdateDepositPercentageRequest,
+  PaymentQrCodeConfig,
+  UpdatePaymentQrCodeRequest,
 } from "@/lib/types/app-settings";
 
 export function useAppSettings() {
@@ -22,6 +24,9 @@ export function useAppSettings() {
   const [depositPercentage, setDepositPercentage] = useState<number | null>(
     null
   );
+  const [qrCodeConfig, setQrCodeConfig] = useState<PaymentQrCodeConfig | null>(
+    null
+  );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -30,15 +35,17 @@ export function useAppSettings() {
     setLoading(true);
     setError(null);
     try {
-      const [checkIn, checkOut, deposit] = await Promise.all([
+      const [checkIn, checkOut, deposit, qrCode] = await Promise.all([
         appSettingsService.getCheckInTime(),
         appSettingsService.getCheckOutTime(),
         appSettingsService.getDepositPercentage(),
+        appSettingsService.getPaymentQrCode().catch(() => null),
       ]);
 
       setCheckInTime(checkIn);
       setCheckOutTime(checkOut);
       setDepositPercentage(deposit);
+      setQrCodeConfig(qrCode);
     } catch (err) {
       const message =
         err instanceof Error ? err.message : "Failed to load settings";
@@ -106,6 +113,25 @@ export function useAppSettings() {
     }
   };
 
+  // Update payment QR code
+  const updatePaymentQrCode = async (config: UpdatePaymentQrCodeRequest) => {
+    setLoading(true);
+    try {
+      const updated = await appSettingsService.updatePaymentQrCode(config);
+      setQrCodeConfig(updated);
+      return updated;
+    } catch (err) {
+      const message =
+        err instanceof Error
+          ? err.message
+          : "Failed to update payment QR code";
+      setError(message);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Load settings on mount
   useEffect(() => {
     loadSettings();
@@ -115,11 +141,13 @@ export function useAppSettings() {
     checkInTime,
     checkOutTime,
     depositPercentage,
+    qrCodeConfig,
     loading,
     error,
     loadSettings,
     updateCheckInTime,
     updateCheckOutTime,
     updateDepositPercentage,
+    updatePaymentQrCode,
   };
 }

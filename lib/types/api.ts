@@ -722,3 +722,25 @@ export interface ChangeRoomResponse {
     priceDifference: number; // Positive = upgrade cost, Negative = downgrade credit
   };
 }
+
+// ============================================================================
+// Payment Image Types
+// ============================================================================
+
+export interface PaymentImage {
+  id: string;
+  bookingId: string;
+  cloudinaryId: string;
+  url: string;
+  secureUrl: string;
+  thumbnailUrl?: string;
+  width?: number;
+  height?: number;
+  format?: string;
+  sortOrder: number;
+  isDefault: boolean;
+  paymentMethod?: string; // e.g., "bank_transfer", "cash", "credit_card"
+  description?: string; // Notes about this payment proof
+  createdAt: string;
+  updatedAt: string;
+}

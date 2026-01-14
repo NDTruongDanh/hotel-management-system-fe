@@ -9,6 +9,7 @@ import { LogIn, LogOut, RefreshCw, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TimeSettingsCard } from "@/components/app-settings/time-settings-card";
 import { DepositSettingsCard } from "@/components/app-settings/deposit-settings-card";
+import { QrCodeSettingsCard } from "@/components/app-settings/qr-code-settings-card";
 import { PenaltySurchargeInfoCard } from "@/components/app-settings/penalty-surcharge-info-card";
 import { useAppSettings } from "@/hooks/use-app-settings";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -18,12 +19,14 @@ export default function AppSettingsPage() {
     checkInTime,
     checkOutTime,
     depositPercentage,
+    qrCodeConfig,
     loading,
     error,
     loadSettings,
     updateCheckInTime,
     updateCheckOutTime,
     updateDepositPercentage,
+    updatePaymentQrCode,
   } = useAppSettings();
 
   return (
@@ -94,6 +97,13 @@ export default function AppSettingsPage() {
         <DepositSettingsCard
           depositPercentage={depositPercentage}
           onUpdate={updateDepositPercentage}
+          loading={loading}
+        />
+
+        {/* Payment QR Code Settings */}
+        <QrCodeSettingsCard
+          qrCodeConfig={qrCodeConfig}
+          onUpdate={updatePaymentQrCode}
           loading={loading}
         />
 

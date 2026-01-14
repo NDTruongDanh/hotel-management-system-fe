@@ -36,7 +36,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { transactionService } from "@/lib/services/transaction.service";
-import { PaymentMethod, PAYMENT_METHOD_LABELS } from "@/lib/types/api";
+import { PaymentMethod, PAYMENT_METHOD_LABELS, PaymentImage } from "@/lib/types/api";
+import { paymentImageService } from "@/lib/services/payment-image.service";
+import Image from "next/image";
 
 // Schema for updating booking
 const updateBookingSchema = z
@@ -67,6 +69,8 @@ export function UpdateBookingModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [confirmDeposit, setConfirmDeposit] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("CASH");
+  const [paymentImages, setPaymentImages] = useState<PaymentImage[]>([]);
+  const [loadingPaymentImages, setLoadingPaymentImages] = useState(false);
 
   // Determine if deposit confirmation is allowed/needed
   // Allowed if status is PENDING or deposit not fully paid
@@ -102,6 +106,25 @@ export function UpdateBookingModal({
       // Reset deposit confirmation state when modal opens
       setConfirmDeposit(false);
       setPaymentMethod("CASH");
+
+      // Fetch payment images
+      const fetchPaymentImages = async () => {
+        try {
+          setLoadingPaymentImages(true);
+          const images = await paymentImageService.getPaymentImages(
+            reservation.reservationID || reservation.id
+          );
+          setPaymentImages(images);
+        } catch (error) {
+          console.error("Failed to fetch payment images", error);
+        } finally {
+          setLoadingPaymentImages(false);
+        }
+      };
+
+      fetchPaymentImages();
+    } else {
+      setPaymentImages([]);
     }
   }, [reservation, isOpen, reset]);
 
@@ -314,6 +337,56 @@ export function UpdateBookingModal({
                 />
               </div>
             </div>
+
+            {/* Payment Images Section */}
+            {paymentImages.length > 0 && (
+              <div className="bg-white p-6 rounded-xl border shadow-sm space-y-4">
+                <h3 className="font-bold text-gray-900 flex items-center gap-2 mb-2">
+                  <span className="w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs">
+                    {ICONS.CAMERA}
+                  </span>
+                  Hình ảnh thanh toán
+                </h3>
+                {loadingPaymentImages ? (
+                  <div className="text-center py-4 text-gray-500">
+                    Đang tải hình ảnh thanh toán...
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    {paymentImages.map((image) => (
+                      <div
+                        key={image.id}
+                        className="group relative border rounded-lg overflow-hidden hover:shadow-lg transition-shadow"
+                      >
+                        <div className="relative aspect-square bg-gray-100">
+                          <Image
+                            src={image.secureUrl}
+                            alt={image.description || "Payment proof"}
+                            fill
+                            className="object-cover"
+                            sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                          />
+                        </div>
+                        {(image.paymentMethod || image.description) && (
+                          <div className="p-2 bg-white">
+                            {image.paymentMethod && (
+                              <p className="text-xs font-medium text-gray-700 capitalize">
+                                {image.paymentMethod.replace("_", " ")}
+                              </p>
+                            )}
+                            {image.description && (
+                              <p className="text-xs text-gray-500 line-clamp-2 mt-1">
+                                {image.description}
+                              </p>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Deposit Section */}
             {canConfirmDeposit && (

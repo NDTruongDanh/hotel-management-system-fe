@@ -79,6 +79,7 @@ import {
   ChevronsRight,
   Wallet,
   AlertOctagon,
+  Camera,
 } from "lucide-react";
 
 export const ICONS = {
@@ -170,4 +171,5 @@ export const ICONS = {
   SERVICE: <Package />,
   ROOM: <BedDouble />,
   ERROR: <AlertOctagon />,
+  CAMERA: <Camera />,
 };
