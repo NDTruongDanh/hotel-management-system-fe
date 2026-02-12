@@ -43,10 +43,17 @@ export const serviceManagementService = {
       { requiresAuth: true }
     );
 
-    const data = (response && typeof response === "object" && "data" in response)
-      ? (response as any).data
-      : response;
-    return data;
+    // Backend wraps response in { data: {...actual_response...} }
+    // So response.data contains { data: [...services], total, page, limit }
+    if (response && typeof response === "object" && "data" in response) {
+      const wrapped = (response as ApiResponse<PaginatedResponse<Service>>).data;
+      
+      // wrapped should be: { data: [...services], total, page, limit }
+      // which matches PaginatedResponse<Service> structure
+      return wrapped;
+    }
+
+    return response as unknown as PaginatedResponse<Service>;
   },
 
   /**

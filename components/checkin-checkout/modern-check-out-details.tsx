@@ -9,6 +9,7 @@ import { ICONS } from "@/src/constants/icons.enum";
 import type { Booking, BookingRoom } from "@/lib/types/api";
 import type { PaymentMethod } from "@/lib/types/payment";
 import { cn } from "@/lib/utils";
+import { AddServiceModal } from "./add-service-modal";
 
 interface ModernCheckOutDetailsProps {
   booking: Booking;
@@ -36,6 +37,7 @@ export function ModernCheckOutDetails({
   const [selectedRooms, setSelectedRooms] = useState<Set<string>>(
     new Set(bookingRooms.map((br) => br.id))
   );
+  const [showAddService, setShowAddService] = useState(false);
 
   const toggleRoomSelection = (bookingRoomId: string) => {
     setSelectedRooms((prev) => {
@@ -410,6 +412,24 @@ export function ModernCheckOutDetails({
           </Card>
         </div>
       </div>
+
+      {/* Add Service Modal */}
+      <AddServiceModal
+        open={showAddService}
+        onOpenChange={setShowAddService}
+        onConfirm={async (formData) => {
+          try {
+            // Service usage implementation removed
+          } catch (error) {
+            console.error("Failed to add service:", error);
+            alert(
+              error instanceof Error
+                ? error.message
+                : "Không thể thêm dịch vụ. Vui lòng thử lại."
+            );
+          }
+        }}
+      />
     </div>
   );
 }
