@@ -1,29 +1,8 @@
 import type { ReservationStatus } from "@/lib/types/reservation";
+import type { CustomerRank } from "@/lib/types/customer-rank";
 
 export type CustomerType = "Cá nhân" | "Doanh nghiệp";
 export type CustomerStatus = "Hoạt động" | "Đã vô hiệu";
-
-// VIP Tier System
-export type VIPTier = "STANDARD" | "VIP" | "PLATINUM";
-
-export const VIP_TIER_LABELS: Record<VIPTier, string> = {
-  STANDARD: "Khách hàng thường",
-  VIP: "VIP",
-  PLATINUM: "Platinum VIP",
-};
-
-export const VIP_TIER_COLORS: Record<VIPTier, string> = {
-  STANDARD: "bg-gray-100 text-gray-800",
-  VIP: "bg-amber-100 text-amber-800",
-  PLATINUM: "bg-purple-100 text-purple-800",
-};
-
-// Spending thresholds for tier upgrades
-export const VIP_TIER_THRESHOLDS: Record<VIPTier, number> = {
-  STANDARD: 0, // 0 - 10M VND
-  VIP: 10000000, // 10M - 50M VND
-  PLATINUM: 50000000, // 50M+ VND
-};
 
 export interface CustomerHistoryRecord {
   reservationId: string;
@@ -36,24 +15,38 @@ export interface CustomerHistoryRecord {
 }
 
 export interface CustomerRecord {
-  customerId: string;
-  customerName: string;
-  phoneNumber: string;
-  email: string;
-  identityCard: string;
-  address: string;
-  nationality: string;
-  customerType: CustomerType;
-  isVip: boolean; // Deprecated - use vipTier instead
-  vipTier: VIPTier; // NEW: VIP tier
-  status: CustomerStatus;
+  // Schema fields
+  id: string;
+  fullName: string;
+  email: string | null;
+  phone: string;
+  idNumber: string | null; // CMND/CCCD
+  address: string | null;
+  imageUrl: string | null;
+  isEmailVerified: boolean;
+
+  // Relations / Computed
+  rankId: string | null;
+  rank: CustomerRank | null;
+  totalSpent: number; // Decimal -> number
+
+  // Legacy/UI fields (mapped or deprecated)
+  customerId?: string; // alias for id
+  customerName?: string; // alias for fullName
+  phoneNumber?: string; // alias for phone
+  identityCard?: string; // alias for idNumber
+
+  // UI Specific
+  nationality?: string;
+  customerType?: CustomerType;
+  status?: CustomerStatus;
   notes?: string;
   createdAt: string;
-  lastVisit: string;
-  totalBookings: number;
-  totalSpent: number; // Total lifetime spending
+  updatedAt?: string;
+  lastVisit?: string;
+  totalBookings?: number;
   tags?: string[];
-  history: CustomerHistoryRecord[];
+  history?: CustomerHistoryRecord[];
 }
 
 export interface CustomerFormData {
@@ -64,14 +57,13 @@ export interface CustomerFormData {
   address: string;
   nationality: string;
   customerType: CustomerType;
-  isVip: boolean;
   notes?: string;
 }
 
 export interface CustomerFilters {
   searchQuery: string;
   typeFilter: CustomerType | "Tất cả";
-  vipFilter: "Tất cả" | "VIP" | "Thường";
+  rankFilter: string | "Tất cả"; // rankId or "Tất cả"
 }
 
 export interface CustomerStatistics {

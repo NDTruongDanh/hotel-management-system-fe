@@ -47,7 +47,13 @@ import {
 import { CustomerFormModal } from "@/components/customers/customer-form-modal";
 import { BookingDetailsModal } from "@/components/customers/booking-details-modal";
 import { customerService } from "@/lib/services/customer.service";
-import type { Customer, CreateCustomerRequest, UpdateCustomerRequest } from "@/lib/types/api";
+import { RankBadge } from "@/components/customer-ranks/rank-badge";
+import { PermissionGuard } from "@/components/permission-guard";
+import type {
+  Customer,
+  CreateCustomerRequest,
+  UpdateCustomerRequest,
+} from "@/lib/types/api";
 import { toast } from "sonner";
 
 export default function CustomersPage() {
@@ -58,12 +64,16 @@ export default function CustomersPage() {
   const [formOpen, setFormOpen] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [deletingCustomer, setDeletingCustomer] = useState<Customer | null>(null);
+  const [deletingCustomer, setDeletingCustomer] = useState<Customer | null>(
+    null
+  );
   const [isDeleting, setIsDeleting] = useState(false);
   const [promotionsDialogOpen, setPromotionsDialogOpen] = useState(false);
-  const [selectedCustomerForPromotions, setSelectedCustomerForPromotions] = useState<Customer | null>(null);
+  const [selectedCustomerForPromotions, setSelectedCustomerForPromotions] =
+    useState<Customer | null>(null);
   const [bookingsDialogOpen, setBookingsDialogOpen] = useState(false);
-  const [selectedCustomerForBookings, setSelectedCustomerForBookings] = useState<Customer | null>(null);
+  const [selectedCustomerForBookings, setSelectedCustomerForBookings] =
+    useState<Customer | null>(null);
 
   // Load customers
   const loadCustomers = async () => {
@@ -86,7 +96,8 @@ export default function CustomersPage() {
       const response = await customerService.getCustomers(params);
       setCustomers(response.data);
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : "Vui lòng thử lại sau";
+      const errorMessage =
+        error instanceof Error ? error.message : "Vui lòng thử lại sau";
       toast.error("Không thể tải danh sách khách hàng", {
         description: errorMessage,
       });
@@ -113,10 +124,15 @@ export default function CustomersPage() {
   };
 
   // Handle save
-  const handleSave = async (data: CreateCustomerRequest | UpdateCustomerRequest) => {
+  const handleSave = async (
+    data: CreateCustomerRequest | UpdateCustomerRequest
+  ) => {
     try {
       if (editingCustomer) {
-        await customerService.updateCustomer(editingCustomer.id, data as UpdateCustomerRequest);
+        await customerService.updateCustomer(
+          editingCustomer.id,
+          data as UpdateCustomerRequest
+        );
         toast.success("Cập nhật khách hàng thành công");
       } else {
         await customerService.createCustomer(data as CreateCustomerRequest);
@@ -124,7 +140,8 @@ export default function CustomersPage() {
       }
       loadCustomers();
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : "Không thể lưu khách hàng";
+      const errorMessage =
+        error instanceof Error ? error.message : "Không thể lưu khách hàng";
       throw new Error(errorMessage);
     }
   };
@@ -145,7 +162,10 @@ export default function CustomersPage() {
       loadCustomers();
       setDeleteDialogOpen(false);
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : "Khách hàng có thể đang có lịch sử đặt phòng";
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Khách hàng có thể đang có lịch sử đặt phòng";
       toast.error("Không thể xóa khách hàng", {
         description: errorMessage,
       });
@@ -169,8 +189,11 @@ export default function CustomersPage() {
   // Statistics - Always use ALL customers (not filtered)
   const stats = {
     total: allCustomers.length,
-    withBookings: allCustomers.filter((c) => c._count && c._count.bookings > 0).length,
-    withPromotions: allCustomers.filter((c) => c._count && c._count.customerPromotions > 0).length,
+    withBookings: allCustomers.filter((c) => c._count && c._count.bookings > 0)
+      .length,
+    withPromotions: allCustomers.filter(
+      (c) => c._count && c._count.customerPromotions > 0
+    ).length,
   };
 
   const hasFilters = searchQuery;
@@ -194,14 +217,16 @@ export default function CustomersPage() {
               </p>
             </div>
           </div>
-          <Button
-            onClick={handleAddNew}
-            size="lg"
-            className="bg-white text-emerald-600 hover:bg-white/90 shadow-2xl hover:shadow-white/20 transition-all duration-300 hover:scale-105 h-14 px-8 font-bold"
-          >
-            <Plus className="mr-2 h-6 w-6" />
-            Thêm khách hàng
-          </Button>
+          <PermissionGuard permission="customer:create">
+            <Button
+              onClick={handleAddNew}
+              size="lg"
+              className="bg-white text-emerald-600 hover:bg-white/90 shadow-2xl hover:shadow-white/20 transition-all duration-300 hover:scale-105 h-14 px-8 font-bold"
+            >
+              <Plus className="mr-2 h-6 w-6" />
+              Thêm khách hàng
+            </Button>
+          </PermissionGuard>
         </div>
       </div>
 
@@ -289,7 +314,9 @@ export default function CustomersPage() {
           {/* Results Summary */}
           <div className="flex items-center gap-2 mt-4 pt-4 border-t">
             <span className="text-sm font-semibold text-gray-700">
-              📊 Tìm thấy <strong className="text-emerald-600">{customers.length}</strong> khách hàng
+              📊 Tìm thấy{" "}
+              <strong className="text-emerald-600">{customers.length}</strong>{" "}
+              khách hàng
               {hasFilters && " (đã lọc)"}
             </span>
           </div>
@@ -315,7 +342,10 @@ export default function CustomersPage() {
                 : "Thêm khách hàng đầu tiên để bắt đầu"}
             </p>
             {!hasFilters && (
-              <Button onClick={handleAddNew} className="bg-gradient-to-r from-emerald-600 to-teal-600">
+              <Button
+                onClick={handleAddNew}
+                className="bg-gradient-to-r from-emerald-600 to-teal-600"
+              >
                 <Plus className="mr-2 h-4 w-4" />
                 Thêm khách hàng
               </Button>
@@ -344,7 +374,9 @@ export default function CustomersPage() {
                           {customer.fullName}
                         </h3>
                         <p className="text-sm text-gray-500 mt-1">
-                          {new Date(customer.createdAt).toLocaleDateString("vi-VN")}
+                          {new Date(customer.createdAt).toLocaleDateString(
+                            "vi-VN"
+                          )}
                         </p>
                       </div>
                     </div>
@@ -352,7 +384,11 @@ export default function CustomersPage() {
                     {/* Actions Menu */}
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
                           <MoreVertical className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
@@ -372,6 +408,16 @@ export default function CustomersPage() {
                     </DropdownMenu>
                   </div>
 
+                  {/* Rank Badge */}
+                  {customer.rank && (
+                    <div className="pt-4 border-t border-gray-200">
+                      <p className="text-xs text-gray-500 font-semibold mb-2 uppercase">
+                        Hạng thành viên
+                      </p>
+                      <RankBadge rank={customer.rank} />
+                    </div>
+                  )}
+
                   {/* Contact Info */}
                   <div className="space-y-2 pt-2 border-t border-gray-200">
                     <div className="flex items-center gap-3 text-sm text-gray-600">
@@ -389,22 +435,26 @@ export default function CustomersPage() {
                   {/* Stats Row */}
                   <div className="grid grid-cols-2 gap-3 pt-2">
                     {/* Bookings */}
-                    <div 
+                    <div
                       onClick={() => handleShowBookings(customer)}
                       className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-3 text-center cursor-pointer hover:from-blue-100 hover:to-blue-200 transition-colors"
                     >
-                      <p className="text-xs text-blue-600 font-semibold uppercase">Booking</p>
+                      <p className="text-xs text-blue-600 font-semibold uppercase">
+                        Booking
+                      </p>
                       <p className="text-2xl font-bold text-blue-900 mt-1">
                         {customer._count?.bookings || 0}
                       </p>
                     </div>
 
                     {/* Promotions */}
-                    <div 
+                    <div
                       onClick={() => handleShowPromotions(customer)}
                       className="bg-gradient-to-br from-pink-50 to-pink-100 rounded-xl p-3 text-center cursor-pointer hover:from-pink-100 hover:to-pink-200 transition-colors"
                     >
-                      <p className="text-xs text-pink-600 font-semibold uppercase">Khuyến mại</p>
+                      <p className="text-xs text-pink-600 font-semibold uppercase">
+                        Khuyến mại
+                      </p>
                       <p className="text-2xl font-bold text-pink-900 mt-1">
                         {customer._count?.customerPromotions || 0}
                       </p>
@@ -414,8 +464,12 @@ export default function CustomersPage() {
                   {/* ID Number */}
                   {customer.idNumber && (
                     <div className="bg-amber-50 rounded-xl p-3 text-center">
-                      <p className="text-xs text-amber-600 font-semibold">CMND/CCCD</p>
-                      <p className="text-sm font-bold text-amber-900 mt-1">{customer.idNumber}</p>
+                      <p className="text-xs text-amber-600 font-semibold">
+                        CMND/CCCD
+                      </p>
+                      <p className="text-sm font-bold text-amber-900 mt-1">
+                        {customer.idNumber}
+                      </p>
                     </div>
                   )}
                 </div>
@@ -434,10 +488,15 @@ export default function CustomersPage() {
       />
 
       {/* Promotions Details Modal */}
-      <Dialog open={promotionsDialogOpen} onOpenChange={setPromotionsDialogOpen}>
+      <Dialog
+        open={promotionsDialogOpen}
+        onOpenChange={setPromotionsDialogOpen}
+      >
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Khuyến mại của {selectedCustomerForPromotions?.fullName}</DialogTitle>
+            <DialogTitle>
+              Khuyến mại của {selectedCustomerForPromotions?.fullName}
+            </DialogTitle>
             <DialogDescription>
               Danh sách tất cả khuyến mại đã claim
             </DialogDescription>
@@ -446,8 +505,12 @@ export default function CustomersPage() {
           <div className="space-y-3">
             {selectedCustomerForPromotions?._count?.customerPromotions ? (
               <div className="text-sm space-y-2">
-                <Badge variant="outline" className="bg-pink-100 text-pink-700 border-pink-300 block w-full text-center py-2">
-                  {selectedCustomerForPromotions._count?.customerPromotions} khuyến mại
+                <Badge
+                  variant="outline"
+                  className="bg-pink-100 text-pink-700 border-pink-300 block w-full text-center py-2"
+                >
+                  {selectedCustomerForPromotions._count?.customerPromotions}{" "}
+                  khuyến mại
                 </Badge>
                 <p className="text-gray-600 text-center py-4">
                   ℹ️ Xem chi tiết khuyến mại tại trang quản lý khuyến mại
@@ -476,13 +539,15 @@ export default function CustomersPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Xác nhận xóa khách hàng</AlertDialogTitle>
             <AlertDialogDescription>
-              Bạn có chắc chắn muốn xóa khách hàng <strong>{deletingCustomer?.fullName}</strong>?
-              Hành động này không thể hoàn tác.
+              Bạn có chắc chắn muốn xóa khách hàng{" "}
+              <strong>{deletingCustomer?.fullName}</strong>? Hành động này không
+              thể hoàn tác.
             </AlertDialogDescription>
             {deletingCustomer && (
               <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
                 <p className="text-sm text-yellow-800">
-                  ⚠️ Lưu ý: Không thể xóa nếu khách hàng có lịch sử đặt phòng trong hệ thống.
+                  ⚠️ Lưu ý: Không thể xóa nếu khách hàng có lịch sử đặt phòng
+                  trong hệ thống.
                 </p>
               </div>
             )}

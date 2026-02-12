@@ -3,6 +3,8 @@
  * Generated from swagger.yml specification
  */
 
+import { CustomerRank } from "./customer-rank";
+
 // ============================================================================
 // Generic API Response Wrappers
 // ============================================================================
@@ -16,6 +18,14 @@ export interface PaginatedResponse<T> {
   total: number;
   page: number;
   limit: number;
+}
+
+export interface PaginatedList<T> {
+  items: T[];
+  totalItems: number;
+  perPage: number;
+  currentPage: number;
+  totalPages: number;
 }
 
 export interface ApiError {
@@ -119,11 +129,18 @@ export interface ChangePasswordRequest {
 
 export type EmployeeRole = "ADMIN" | "RECEPTIONIST" | "HOUSEKEEPING" | "STAFF";
 
+export interface Role {
+  id: string;
+  name: string;
+}
+
 export interface Employee {
   id: string;
   name: string;
   username: string;
-  role: EmployeeRole;
+  role?: EmployeeRole;
+  roleId?: string;
+  roleRef?: Role;
   updatedAt: string;
 }
 
@@ -131,12 +148,12 @@ export interface CreateEmployeeRequest {
   name: string;
   username: string;
   password: string;
-  role?: EmployeeRole;
+  roleId: string; // Changed from role to roleId - expects UUID from backend
 }
 
 export interface UpdateEmployeeRequest {
   name?: string;
-  role?: EmployeeRole;
+  roleId?: string; // Changed from role to roleId - expects UUID from backend
 }
 
 export interface GetEmployeesParams {
@@ -146,6 +163,13 @@ export interface GetEmployeesParams {
   limit?: number;
   sortBy?: "name" | "username" | "role" | "createdAt" | "updatedAt";
   sortOrder?: "asc" | "desc";
+}
+
+export interface Permission {
+  permissionId: string;
+  permissionName: string;
+  description: string;
+  module: string;
 }
 
 // ============================================================================
@@ -161,6 +185,9 @@ export interface Customer {
   address?: string;
   createdAt: string;
   updatedAt: string;
+  totalSpent?: number; // NEW: Total lifetime spending (auto-calculated from completed transactions)
+  rankId?: string | null; // NEW: Customer rank reference
+  rank?: CustomerRank | null;
   _count?: {
     bookings: number;
     customerPromotions: number;
@@ -214,6 +241,20 @@ export interface RoomTag {
   };
 }
 
+export interface RoomTypeImage {
+  id: string;
+  url: string;
+  secureUrl: string;
+  thumbnailUrl?: string;
+  cloudinaryId: string;
+  width?: number;
+  height?: number;
+  format?: string;
+  sortOrder: number;
+  isDefault: boolean;
+  createdAt: string;
+}
+
 export interface RoomTypeTag {
   id: string;
   name: string;
@@ -227,8 +268,10 @@ export interface RoomType {
   name: string;
   capacity: number;
   totalBed: number;
-  pricePerNight: string;
+  basePrice?: string | number;
+  pricePerNight?: string;
   roomTypeTags?: RoomTypeTag[];
+  roomTypeImages?: RoomTypeImage[];
   createdAt: string;
   updatedAt: string;
   _count?: {
@@ -311,12 +354,27 @@ export interface GetRoomTypesParams {
 // Service Types
 // ============================================================================
 
+export interface ServiceImage {
+  id: string;
+  url: string;
+  secureUrl: string;
+  thumbnailUrl?: string;
+  cloudinaryId: string;
+  width?: number;
+  height?: number;
+  format?: string;
+  sortOrder: number;
+  isDefault: boolean;
+  createdAt: string;
+}
+
 export interface Service {
   id: string;
   name: string;
-  price: string;
+  price: number; // Changed from string to number (parse Decimal from backend)
   unit: string;
   isActive: boolean;
+  serviceImages?: ServiceImage[];
   createdAt: string;
   updatedAt: string;
   _count?: {
@@ -353,13 +411,16 @@ export interface GetServicesParams {
 // Booking Types
 // ============================================================================
 
+// Backend BookingStatus enum - matches Prisma schema exactly
+// Status progression: PENDING → CONFIRMED → CHECKED_IN → [PARTIALLY_CHECKED_OUT] → CHECKED_OUT
+// Can be CANCELLED at any point (except after CHECKED_OUT)
 export type BookingStatus =
-  | "PENDING"
-  | "CONFIRMED"
-  | "CHECKED_IN"
-  | "CHECKED_OUT"
-  | "CANCELLED"
-  | "EXPIRED";
+  | "PENDING" // Chờ xác nhận - chưa đặt cọc
+  | "CONFIRMED" // Đã xác nhận - đã đặt cọc (hoặc employee manual confirm)
+  | "CHECKED_IN" // Đã nhận phòng - at least 1 room checked in
+  | "PARTIALLY_CHECKED_OUT" // Trả phòng một phần - some rooms checked out (multi-room only)
+  | "CHECKED_OUT" // Đã trả phòng - all rooms checked out
+  | "CANCELLED"; // Đã hủy - cancelled by customer or employee
 
 export type TransactionType =
   | "DEPOSIT"
@@ -374,14 +435,155 @@ export type PaymentMethod =
   | "BANK_TRANSFER"
   | "E_WALLET";
 
+// Transaction Status
+export type TransactionStatus = "PENDING" | "COMPLETED" | "FAILED" | "REFUNDED";
+
+// Transaction interfaces
+export interface Transaction {
+  id: string;
+  bookingId: string;
+  amount: number;
+  baseAmount: number;
+  discountAmount: number;
+  type: TransactionType;
+  method: PaymentMethod;
+  status: TransactionStatus;
+  description?: string;
+  processedById: string;
+  occurredAt: string;
+  createdAt: string;
+  updatedAt: string;
+  booking?: Booking;
+  processedBy?: {
+    id: string;
+    name: string;
+    username: string;
+  };
+}
+
+export interface TransactionDetail {
+  id: string;
+  transactionId: string;
+  bookingRoomId?: string;
+  serviceUsageId?: string;
+  baseAmount: number;
+  discountAmount: number;
+  amount: number;
+  createdAt: string;
+  updatedAt: string;
+  bookingRoom?: BookingRoom;
+  serviceUsage?: {
+    id: string;
+    quantity: number;
+    service: {
+      id: string;
+      name: string;
+      price: number;
+    };
+  };
+}
+
+export interface GetTransactionsParams {
+  bookingId?: string;
+  type?: TransactionType;
+  status?: TransactionStatus;
+  page?: number;
+  limit?: number;
+  sortBy?: string;
+  sortOrder?: "asc" | "desc";
+}
+
+// Transaction interfaces
+export interface Transaction {
+  id: string;
+  bookingId: string;
+  amount: number;
+  baseAmount: number;
+  discountAmount: number;
+  type: TransactionType;
+  method: PaymentMethod;
+  status: TransactionStatus;
+  description?: string;
+  processedById: string;
+  occurredAt: string;
+  createdAt: string;
+  updatedAt: string;
+  booking?: Booking;
+  processedBy?: {
+    id: string;
+    name: string;
+    username: string;
+  };
+}
+
+export interface TransactionDetail {
+  id: string;
+  transactionId: string;
+  bookingRoomId?: string;
+  serviceUsageId?: string;
+  baseAmount: number;
+  discountAmount: number;
+  amount: number;
+  createdAt: string;
+  updatedAt: string;
+  bookingRoom?: BookingRoom;
+  serviceUsage?: {
+    id: string;
+    quantity: number;
+    service: {
+      id: string;
+      name: string;
+      price: number;
+    };
+  };
+}
+
+export const TRANSACTION_STATUS_LABELS: Record<TransactionStatus, string> = {
+  PENDING: "Chờ xử lý",
+  COMPLETED: "Hoàn thành",
+  FAILED: "Thất bại",
+  REFUNDED: "Đã hoàn tiền",
+};
+
+export const TRANSACTION_STATUS_COLORS: Record<TransactionStatus, string> = {
+  PENDING: "bg-yellow-100 text-yellow-800",
+  COMPLETED: "bg-green-100 text-green-800",
+  FAILED: "bg-red-100 text-red-800",
+  REFUNDED: "bg-blue-100 text-blue-800",
+};
+
+// Service Usage Status
+export type ServiceUsageStatus =
+  | "PENDING"
+  | "TRANSFERRED"
+  | "COMPLETED"
+  | "CANCELLED";
+
+export const SERVICE_USAGE_STATUS_LABELS: Record<ServiceUsageStatus, string> = {
+  PENDING: "Chờ xử lý",
+  TRANSFERRED: "Đã chuyển",
+  COMPLETED: "Hoàn thành",
+  CANCELLED: "Đã hủy",
+};
+
+export const SERVICE_USAGE_STATUS_COLORS: Record<ServiceUsageStatus, string> = {
+  PENDING: "bg-yellow-100 text-yellow-800",
+  TRANSFERRED: "bg-blue-100 text-blue-800",
+  COMPLETED: "bg-green-100 text-green-800",
+  CANCELLED: "bg-gray-100 text-gray-800",
+};
+
+// Payment Method Labels
+export const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
+  CASH: "Tiền mặt",
+  CREDIT_CARD: "Thẻ tín dụng",
+  BANK_TRANSFER: "Chuyển khoản",
+  E_WALLET: "Ví điện tử",
+};
+
 // ============================================================================
 // Booking Related Types
 // ============================================================================
-
-export interface RoomRequest {
-  roomTypeId: string;
-  count: number;
-}
 
 export interface CreateBookingRequest {
   customerId?: string;
@@ -393,12 +595,13 @@ export interface CreateBookingRequest {
     address?: string;
   };
   rooms: Array<{
-    roomTypeId: string;
-    count: number;
+    roomId: string;
   }>;
   checkInDate: string; // ISO 8601 format
   checkOutDate: string; // ISO 8601 format
   totalGuests: number;
+  depositAmount?: number;
+  depositPaymentMethod?: PaymentMethod;
 }
 
 export interface CreateBookingResponse {
@@ -422,13 +625,17 @@ export interface CheckOutRequest {
 }
 
 export interface CreateTransactionRequest {
-  bookingId: string;
+  bookingId?: string;
+  bookingRoomIds?: string[];
+  serviceUsageId?: string;
+  paymentMethod: PaymentMethod;
   transactionType: TransactionType;
-  amount: number;
-  method: PaymentMethod;
-  bookingRoomId?: string;
-  transactionRef?: string;
   description?: string;
+  promotionApplications?: Array<{
+    customerPromotionId: string;
+    bookingRoomId?: string;
+    serviceUsageId?: string;
+  }>;
 }
 
 // Booking Room - represents individual room within a booking
@@ -441,21 +648,27 @@ export interface BookingRoom {
   checkOutDate: string;
   pricePerNight: string;
   subtotalRoom: string;
+  subtotalService: string;
   totalAmount: string;
-  balance: string;
   status: BookingStatus;
   actualCheckIn?: string;
   actualCheckOut?: string;
   room?: Room;
   roomType?: RoomType;
   booking?: Booking;
-  bookingCustomers?: Array<{
-    bookingId: string;
-    customerId: string;
-    bookingRoomId: string;
-    isPrimary: boolean;
-    customer: Customer;
-  }>;
+  bookingCustomers?: BookingCustomer[];
+}
+
+// Booking Customer - represents customer assignment to booking/room
+export interface BookingCustomer {
+  id: string;
+  bookingId: string;
+  customerId: string;
+  bookingRoomId?: string;
+  isPrimary: boolean;
+  customer?: Customer;
+  createdAt: string;
+  updatedAt: string;
 }
 
 // Booking - main booking entity
@@ -469,11 +682,14 @@ export interface Booking {
   totalGuests: number;
   totalAmount: string;
   depositRequired: string;
+  totalDeposit: string; // Tiền cọc đã thanh toán (source of truth for deposit confirmation)
+  totalPaid: string; // Tổng tiền đã thanh toán (bao gồm deposit + các khoản khác)
   balance: string;
   createdAt: string;
   updatedAt: string;
   primaryCustomer?: Customer;
   bookingRooms?: BookingRoom[];
+  bookingCustomers?: BookingCustomer[];
   cancelledAt?: string;
   cancelReason?: string;
   confirmedAt?: string;
@@ -510,24 +726,33 @@ export interface CreateBookingEmployeeRequest {
     address?: string;
   };
   rooms: Array<{
-    roomTypeId: string;
-    count: number;
+    roomId: string;
   }>;
   checkInDate: string; // ISO 8601 format
   checkOutDate: string; // ISO 8601 format
   totalGuests: number;
   notes?: string;
+  depositAmount?: number;
+  depositPaymentMethod?: PaymentMethod;
 }
 
 /**
  * Update booking request - for modifying existing booking details
  * PUT /employee/bookings/{id}
+ *
+ * Backend constraints:
+ * - Cannot update CANCELLED or CHECKED_OUT bookings
+ * - Can only update: checkInDate, checkOutDate, totalGuests
+ * - Status is managed by system (transactions, check-in/out), NOT directly editable
+ * - Rooms field exists in validation schema but Backend service doesn't implement room changes
+ *   (updateBooking() in booking.service.ts only does prisma.booking.update() - no room logic)
  */
 export interface UpdateBookingRequest {
   checkInDate?: string; // ISO 8601 format
   checkOutDate?: string; // ISO 8601 format
   totalGuests?: number;
-  status?: BookingStatus;
+  // status removed - managed by system, not editable via update API
+  // rooms removed - Backend validation allows it but service doesn't implement changes
 }
 
 export interface UpdateBookingResponse {
@@ -541,16 +766,15 @@ export interface UpdateBookingResponse {
   updatedAt: string;
 }
 
-export interface CancelBookingRequest {
-  reason?: string;
-}
+// Backend cancelBooking() accepts NO body parameters
+// The endpoint signature is: async cancelBooking(id: string)
+// Request body should be empty {}
+export type CancelBookingRequest = Record<string, never>;
 
+// Backend returns: { message: 'Booking cancelled successfully' }
+// But we define the expected response structure for type safety
 export interface CancelBookingResponse {
-  id: string;
-  bookingCode: string;
-  status: "CANCELLED";
-  cancelledAt: string;
-  cancelReason?: string;
+  message: string;
 }
 
 export interface ConfirmBookingResponse {
@@ -564,6 +788,16 @@ export interface AvailableRoomSearchParams {
   checkInDate: string;
   checkOutDate: string;
   roomTypeId?: string;
+  search?: string;
+  floor?: number;
+  minCapacity?: number;
+  maxCapacity?: number;
+  minPrice?: number;
+  maxPrice?: number;
+  page?: number;
+  limit?: number;
+  sortBy?: string;
+  sortOrder?: "asc" | "desc";
 }
 
 export interface AvailableRoom {
@@ -572,4 +806,23 @@ export interface AvailableRoom {
   floor: number;
   status: RoomStatus;
   roomType: RoomType;
+}
+
+// ============================================================================
+// Room Transfer Types (Change Room)
+// ============================================================================
+
+export interface ChangeRoomRequest {
+  newRoomId: string;
+  reason?: string; // Optional reason for room change (max 500 chars)
+}
+
+export interface ChangeRoomResponse {
+  bookingRoom: BookingRoom;
+  priceAdjustment: {
+    oldPricePerNight: number;
+    newPricePerNight: number;
+    remainingNights: number;
+    priceDifference: number; // Positive = upgrade cost, Negative = downgrade credit
+  };
 }

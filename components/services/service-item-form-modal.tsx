@@ -12,7 +12,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -21,20 +20,22 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ICONS } from "@/src/constants/icons.enum";
-import {
-  ServiceItem,
-  ServiceItemFormData,
-  ServiceCategory,
-  ServiceGroup,
-  SERVICE_GROUP_LABELS,
-} from "@/lib/types/service";
+import type { Service } from "@/lib/types/api";
+import ImageUpload from "@/components/ImageUpload";
+import LocalImageUpload from "@/components/LocalImageUpload";
+
+interface ServiceFormData {
+  name: string;
+  price: number;
+  unit: string;
+  isActive: boolean;
+}
 
 interface ServiceItemFormModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: ServiceItemFormData) => void;
-  service?: ServiceItem;
-  categories: ServiceCategory[];
+  onSubmit: (data: ServiceFormData, files?: File[]) => void;
+  service?: Service;
   mode: "create" | "edit";
 }
 
@@ -43,78 +44,61 @@ export function ServiceItemFormModal({
   onClose,
   onSubmit,
   service,
-  categories,
   mode,
 }: ServiceItemFormModalProps) {
-  const initialData: ServiceItemFormData =
+  const initialData: ServiceFormData =
     service && mode === "edit"
       ? {
-          serviceName: service.serviceName,
-          categoryID: service.categoryID,
-          serviceGroup: service.serviceGroup,
+          name: service.name,
           price: service.price,
           unit: service.unit,
-          description: service.description || "",
-          imageUrl: service.imageUrl || "",
+          isActive: service.isActive,
         }
       : {
-          serviceName: "",
-          categoryID: "",
-          serviceGroup: "F&B" as ServiceGroup,
+          name: "",
           price: 0,
-          unit: "",
-          description: "",
-          imageUrl: "",
+          unit: "lần",
+          isActive: true,
         };
 
-  const [formData, setFormData] = useState<ServiceItemFormData>(initialData);
+  const [formData, setFormData] = useState<ServiceFormData>(initialData);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   // Load data when modal opens or service changes
   useEffect(() => {
     if (isOpen) {
-      if (service && mode === "edit") {
-        setFormData({
-          serviceName: service.serviceName,
-          categoryID: service.categoryID,
-          serviceGroup: service.serviceGroup,
-          price: service.price,
-          unit: service.unit,
-          description: service.description || "",
-          imageUrl: service.imageUrl || "",
-        });
-      } else {
-        setFormData({
-          serviceName: "",
-          categoryID: "",
-          serviceGroup: "F&B" as ServiceGroup,
-          price: 0,
-          unit: "",
-          description: "",
-          imageUrl: "",
-        });
-      }
-      setErrors({});
+      setTimeout(() => {
+        setSelectedFiles([]); // Reset files on open
+        if (service && mode === "edit") {
+          setFormData({
+            name: service.name,
+            price: service.price,
+            unit: service.unit,
+            isActive: service.isActive,
+          });
+        } else {
+          setFormData({
+            name: "",
+            price: 0,
+            unit: "lần",
+            isActive: true,
+          });
+        }
+        setErrors({});
+      }, 0);
     }
   }, [isOpen, service, mode]);
 
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
 
-    if (!formData.serviceName.trim()) {
-      newErrors.serviceName = "Tên dịch vụ không được để trống";
-    }
-
-    if (!formData.categoryID) {
-      newErrors.categoryID = "Vui lòng chọn loại dịch vụ";
+    if (!formData.name.trim()) {
+      newErrors.name = "Tên dịch vụ không được để trống";
     }
 
     if (!formData.price || formData.price <= 0) {
       newErrors.price = "Giá dịch vụ phải lớn hơn 0";
-    }
-
-    if (!formData.serviceGroup) {
-      newErrors.serviceGroup = "Vui lòng chọn nhóm dịch vụ";
     }
 
     if (!formData.unit.trim()) {
@@ -132,19 +116,16 @@ export function ServiceItemFormModal({
       return;
     }
 
-    onSubmit(formData);
+    onSubmit(formData, selectedFiles);
     onClose();
   };
 
   const handleClose = () => {
     setFormData({
-      serviceName: "",
-      categoryID: "",
-      serviceGroup: "F&B" as ServiceGroup,
+      name: "",
       price: 0,
-      unit: "",
-      description: "",
-      imageUrl: "",
+      unit: "lần",
+      isActive: true,
     });
     setErrors({});
     onClose();
@@ -159,7 +140,7 @@ export function ServiceItemFormModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold">
             {mode === "create" ? "Thêm dịch vụ mới" : "Chỉnh sửa dịch vụ"}
@@ -173,87 +154,20 @@ export function ServiceItemFormModal({
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="serviceName">
+            <Label htmlFor="name">
               Tên dịch vụ <span className="text-error-600">*</span>
             </Label>
             <Input
-              id="serviceName"
-              value={formData.serviceName}
+              id="name"
+              value={formData.name}
               onChange={(e) =>
-                setFormData({ ...formData, serviceName: e.target.value })
+                setFormData({ ...formData, name: e.target.value })
               }
               placeholder="Ví dụ: Nước suối, Giặt ủi áo sơ mi..."
-              className={errors.serviceName ? "border-error-600" : ""}
+              className={errors.name ? "border-error-600" : ""}
             />
-            {errors.serviceName && (
-              <p className="text-sm text-error-600">{errors.serviceName}</p>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="categoryID">
-              Loại dịch vụ <span className="text-error-600">*</span>
-            </Label>
-            <Select
-              value={formData.categoryID}
-              onValueChange={(value) =>
-                setFormData({ ...formData, categoryID: value })
-              }
-            >
-              <SelectTrigger
-                className={errors.categoryID ? "border-error-600" : ""}
-              >
-                <SelectValue placeholder="Chọn loại dịch vụ" />
-              </SelectTrigger>
-              <SelectContent>
-                {categories
-                  .filter((cat) => cat.isActive)
-                  .map((category) => (
-                    <SelectItem
-                      key={category.categoryID}
-                      value={category.categoryID}
-                    >
-                      {category.categoryName}
-                    </SelectItem>
-                  ))}
-              </SelectContent>
-            </Select>
-            {errors.categoryID && (
-              <p className="text-sm text-error-600">{errors.categoryID}</p>
-            )}
-          </div>
-
-          {/* NEW: Service Group Dropdown */}
-          <div className="space-y-2">
-            <Label htmlFor="serviceGroup">
-              Nhóm dịch vụ <span className="text-error-600">*</span>
-            </Label>
-            <Select
-              value={formData.serviceGroup}
-              onValueChange={(value: ServiceGroup) => {
-                setFormData({
-                  ...formData,
-                  serviceGroup: value,
-                });
-              }}
-            >
-              <SelectTrigger
-                className={errors.serviceGroup ? "border-error-600" : ""}
-              >
-                <SelectValue placeholder="Chọn nhóm dịch vụ" />
-              </SelectTrigger>
-              <SelectContent>
-                {(Object.keys(SERVICE_GROUP_LABELS) as ServiceGroup[]).map(
-                  (group) => (
-                    <SelectItem key={group} value={group}>
-                      {SERVICE_GROUP_LABELS[group]}
-                    </SelectItem>
-                  )
-                )}
-              </SelectContent>
-            </Select>
-            {errors.serviceGroup && (
-              <p className="text-sm text-error-600">{errors.serviceGroup}</p>
+            {errors.name && (
+              <p className="text-sm text-error-600">{errors.name}</p>
             )}
           </div>
 
@@ -297,7 +211,7 @@ export function ServiceItemFormModal({
                 onChange={(e) =>
                   setFormData({ ...formData, unit: e.target.value })
                 }
-                placeholder="chai, gói, cái..."
+                placeholder="lần, chai, gói..."
                 className={errors.unit ? "border-error-600" : ""}
               />
               {errors.unit && (
@@ -307,32 +221,45 @@ export function ServiceItemFormModal({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Mô tả</Label>
-            <Textarea
-              id="description"
-              value={formData.description}
-              onChange={(e) =>
-                setFormData({ ...formData, description: e.target.value })
-              }
-              placeholder="Mô tả chi tiết về dịch vụ..."
-              rows={3}
-            />
+            <Label htmlFor="isActive">
+              <div className="flex items-center gap-2">
+                <input
+                  id="isActive"
+                  type="checkbox"
+                  checked={formData.isActive}
+                  onChange={(e) =>
+                    setFormData({ ...formData, isActive: e.target.checked })
+                  }
+                  className="w-4 h-4 rounded border-gray-300"
+                />
+                <span>Kích hoạt dịch vụ</span>
+              </div>
+            </Label>
           </div>
 
+          {/* Image Management - Show upload component when editing */}
+          {service?.id && mode === "edit" && (
+            <div className="space-y-2 mb-4">
+              <Label>Hình ảnh hiện có</Label>
+              <ImageUpload
+                entityType="service"
+                entityId={service.id}
+                disableUpload={true}
+              />
+            </div>
+          )}
+
           <div className="space-y-2">
-            <Label htmlFor="imageUrl">URL Hình ảnh</Label>
-            <Input
-              id="imageUrl"
-              type="url"
-              value={formData.imageUrl}
-              onChange={(e) =>
-                setFormData({ ...formData, imageUrl: e.target.value })
-              }
-              placeholder="https://example.com/service.jpg"
+            <Label className="flex items-center gap-2">
+              {mode === "create" ? "Hình ảnh" : "Thêm ảnh mới"}
+              <span className="text-xs text-gray-500 font-normal">
+                (sẽ upload sau khi lưu)
+              </span>
+            </Label>
+            <LocalImageUpload
+              files={selectedFiles}
+              onFilesChange={setSelectedFiles}
             />
-            <p className="text-xs text-gray-500">
-              Nhập đường dẫn URL của hình ảnh dịch vụ (không bắt buộc)
-            </p>
           </div>
 
           <DialogFooter className="gap-3">
@@ -348,10 +275,10 @@ export function ServiceItemFormModal({
               type="submit"
               className="h-11 px-6 bg-linear-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-600 font-bold shadow-lg"
             >
-              <div className="w-4 h-4 mr-2 flex items-center justify-center">{ICONS.SAVE}</div>
-              <span>
-                {mode === "create" ? "Thêm mới" : "Cập nhật"}
-              </span>
+              <div className="w-4 h-4 mr-2 flex items-center justify-center">
+                {ICONS.SAVE}
+              </div>
+              <span>{mode === "create" ? "Thêm mới" : "Cập nhật"}</span>
             </Button>
           </DialogFooter>
         </form>
@@ -359,4 +286,3 @@ export function ServiceItemFormModal({
     </Dialog>
   );
 }
-

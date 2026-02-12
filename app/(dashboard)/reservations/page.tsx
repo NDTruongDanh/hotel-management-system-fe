@@ -6,12 +6,15 @@ import { ICONS } from "@/src/constants/icons.enum";
 import { UnifiedReservationsFilter } from "@/components/reservations/unified-reservations-filter";
 import { ReservationCalendar } from "@/components/reservations/reservation-calendar";
 import { ReservationList } from "@/components/reservations/reservation-list";
-import { ReservationFormModal } from "@/components/reservations/reservation-form-modal";
+
 import { CancelReservationDialog } from "@/components/reservations/cancel-reservation-dialog";
 import { AvailableRoomsModal } from "@/components/reservations/available-rooms-modal";
 import { RoomSelectionModal } from "@/components/reservations/room-selection-modal";
-import { mockRoomTypes } from "@/lib/mock-room-types";
+import { BookingModal } from "@/components/reservations/booking-modal/create-booking-modal";
+import { UpdateBookingModal } from "@/components/reservations/booking-modal/update-booking-modal";
+import { ViewBookingModal } from "@/components/reservations/booking-modal/view-booking-modal";
 import { useReservations } from "@/hooks/use-reservations";
+import { PermissionGuard } from "@/components/permission-guard";
 import { useMemo, useState, useEffect } from "react";
 import { roomService } from "@/lib/services/room.service";
 import type { RoomType } from "@/lib/types/room";
@@ -48,7 +51,6 @@ export default function ReservationsPage() {
     handleEdit,
     handleCancelClick,
     handleConfirmCancel,
-    handleSaveReservation,
     handleViewDetails,
     handleCloseFormModal,
     handleCloseCancelModal,
@@ -59,7 +61,8 @@ export default function ReservationsPage() {
   } = useReservations();
 
   // Fetch room types from backend API
-  const [roomTypes, setRoomTypes] = useState<RoomType[]>(mockRoomTypes);
+  const [roomTypes, setRoomTypes] = useState<RoomType[]>([]);
+  const [showAllReservations, setShowAllReservations] = useState(false);
 
   useEffect(() => {
     const loadRoomTypes = async () => {
@@ -69,14 +72,24 @@ export default function ReservationsPage() {
 
         if (apiRoomTypes.length > 0) {
           // Convert API RoomType to local RoomType format
-          const converted: RoomType[] = apiRoomTypes.map((rt: ApiRoomType) => ({
-            roomTypeID: rt.id,
-            roomTypeName: rt.name,
-            price: parseInt(rt.pricePerNight) || 0,
-            capacity: rt.capacity,
-            totalBed: rt.totalBed,
-            amenities: rt.roomTypeTags?.map((tag) => tag.roomTag.name) || [],
-          }));
+          const converted: RoomType[] = apiRoomTypes.map((rt: ApiRoomType) => {
+            // Handle price from either pricePerNight or basePrice
+            const priceValue =
+              (rt as any).pricePerNight || (rt as any).basePrice;
+            const price = priceValue ? parseInt(String(priceValue)) || 0 : 0;
+
+            return {
+              id: rt.id,
+              name: rt.name,
+              basePrice: price,
+              roomTypeID: rt.id,
+              roomTypeName: rt.name,
+              price,
+              capacity: rt.capacity,
+              totalBed: rt.totalBed,
+              amenities: rt.roomTypeTags?.map((tag) => tag.roomTag.name) || [],
+            };
+          });
           setRoomTypes(converted);
           console.log("Loaded room types from API:", converted);
         }
@@ -180,13 +193,15 @@ export default function ReservationsPage() {
               Tạo, xem, sửa và hủy đặt phòng cho khách hàng
             </p>
           </div>
-          <Button
-            onClick={handleCreateNew}
-            className="h-12 px-6 bg-white text-blue-600 hover:bg-gray-50 hover:scale-105 font-bold shadow-xl transition-all text-base"
-          >
-            <span className="w-5 h-5 mr-2">{ICONS.PLUS}</span>
-            Tạo đặt phòng mới
-          </Button>
+          <PermissionGuard permission="booking:create">
+            <Button
+              onClick={handleCreateNew}
+              className="h-12 px-6 bg-white text-blue-600 hover:bg-gray-50 hover:scale-105 font-bold shadow-xl transition-all text-base"
+            >
+              <span className="w-5 h-5 mr-2">{ICONS.PLUS}</span>
+              Tạo đặt phòng mới
+            </Button>
+          </PermissionGuard>
         </div>
 
         {/* Stats Cards */}
@@ -275,7 +290,6 @@ export default function ReservationsPage() {
           </div>
         </div>
       </div>
-
       {/* Modern Recent Bookings Section */}
       {reservations.length > 0 && (
         <div className="space-y-4">
@@ -290,10 +304,14 @@ export default function ReservationsPage() {
 
           {/* Bookings Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {reservations.slice(0, 6).map((reservation) => {
-              const firstDetail = reservation.details[0];
-              const statusColors: Record<string, { bg: string; text: string }> =
-                {
+            {reservations
+              .slice(0, showAllReservations ? undefined : 6)
+              .map((reservation) => {
+                const firstDetail = reservation.details[0];
+                const statusColors: Record<
+                  string,
+                  { bg: string; text: string }
+                > = {
                   "Chờ xác nhận": {
                     bg: "bg-yellow-100",
                     text: "text-yellow-700",
@@ -309,103 +327,166 @@ export default function ReservationsPage() {
                   },
                   "Đã hủy": { bg: "bg-red-100", text: "text-red-700" },
                 };
-              const statusColor =
-                statusColors[reservation.status] ||
-                statusColors["Chờ xác nhận"];
+                const statusColor =
+                  statusColors[reservation.status] ||
+                  statusColors["Chờ xác nhận"];
 
-              return (
-                <div
-                  key={reservation.reservationID}
-                  className="bg-white rounded-2xl border-2 border-gray-200 p-6 shadow-lg hover:shadow-2xl hover:-translate-y-1 transition-all cursor-pointer group"
-                  onClick={() => handleViewDetails(reservation)}
-                >
-                  {/* Header */}
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex-1">
-                      <p className="text-sm font-bold text-gray-500 uppercase tracking-wide">
-                        Mã đặt
-                      </p>
-                      <p className="text-lg font-extrabold text-blue-600 mt-1">
-                        {reservation.reservationID}
-                      </p>
-                    </div>
+                // Only allow editing for pending reservations
+                const canEdit = (res: typeof reservation) => {
+                  return res.status === "Chờ xác nhận";
+                };
+
+                const canCancel = (res: typeof reservation) => {
+                  // Backend: Cannot cancel if CANCELLED, CHECKED_IN, or CHECKED_OUT
+                  const cannotCancelStatuses = [
+                    "Đã hủy",
+                    "Đã nhận phòng",
+                    "Đã trả phòng",
+                  ];
+                  return !cannotCancelStatuses.includes(res.status);
+                };
+
+                return (
+                  <div
+                    key={reservation.reservationID}
+                    className="bg-white rounded-2xl border-2 border-gray-200 p-6 shadow-lg hover:shadow-2xl hover:-translate-y-1 transition-all group flex flex-col"
+                  >
+                    {/* Header */}
                     <div
-                      className={`${statusColor.bg} ${statusColor.text} px-4 py-2 rounded-lg font-bold text-sm`}
+                      className="flex items-start justify-between mb-4 cursor-pointer"
+                      onClick={() => handleViewDetails(reservation)}
                     >
-                      {reservation.status}
+                      <div className="flex-1">
+                        <p className="text-sm font-bold text-gray-500 uppercase tracking-wide">
+                          Mã đặt
+                        </p>
+                        <p className="text-lg font-extrabold text-blue-600 mt-1">
+                          {reservation.reservationID}
+                        </p>
+                      </div>
+                      <div
+                        className={`${statusColor.bg} ${statusColor.text} px-4 py-2 rounded-lg font-bold text-sm`}
+                      >
+                        {reservation.status}
+                      </div>
+                    </div>
+
+                    {/* Customer Info */}
+                    <div
+                      className="bg-gray-50 rounded-xl p-4 mb-4 cursor-pointer"
+                      onClick={() => handleViewDetails(reservation)}
+                    >
+                      <p className="text-sm font-bold text-gray-600">
+                        Khách hàng
+                      </p>
+                      <p className="text-base font-extrabold text-gray-900 mt-1">
+                        {reservation.customer.customerName}
+                      </p>
+                      <p className="text-xs text-gray-600 mt-1">
+                        {reservation.customer.phoneNumber}
+                      </p>
+                    </div>
+
+                    {/* Room & Dates */}
+                    <div
+                      className="space-y-3 mb-4 cursor-pointer"
+                      onClick={() => handleViewDetails(reservation)}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="w-5 h-5 text-blue-600">
+                          {ICONS.DOOR_OPEN}
+                        </span>
+                        <span className="text-sm font-semibold text-gray-700">
+                          {firstDetail.roomName} ({firstDetail.roomTypeName})
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="w-5 h-5 text-green-600">
+                          {ICONS.CALENDAR}
+                        </span>
+                        <span className="text-sm font-semibold text-gray-700">
+                          {new Date(firstDetail.checkInDate).toLocaleDateString(
+                            "vi-VN"
+                          )}{" "}
+                          -{" "}
+                          {new Date(
+                            firstDetail.checkOutDate
+                          ).toLocaleDateString("vi-VN")}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Price */}
+                    <div
+                      className="border-t border-gray-200 pt-4 flex items-center justify-between mb-4 cursor-pointer"
+                      onClick={() => handleViewDetails(reservation)}
+                    >
+                      <span className="text-xs font-bold text-gray-600 uppercase">
+                        Tổng tiền
+                      </span>
+                      <span className="text-xl font-extrabold bg-linear-to-r from-blue-600 to-blue-700 bg-clip-text text-transparent">
+                        {new Intl.NumberFormat("vi-VN", {
+                          style: "currency",
+                          currency: "VND",
+                          maximumFractionDigits: 0,
+                        }).format(reservation.totalAmount)}
+                      </span>
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="border-t border-gray-200 pt-4 flex gap-3 flex-wrap">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleViewDetails(reservation)}
+                        className="h-9 px-4 bg-blue-50 border-2 border-blue-300 text-blue-700 font-bold hover:bg-blue-600 hover:text-white hover:border-blue-700 hover:scale-110 transition-all shadow-sm flex-1 min-w-[100px]"
+                      >
+                        <span className="w-4 h-4 mr-1.5">{ICONS.EYE}</span>
+                        Xem
+                      </Button>
+                      {canEdit(reservation) && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleEdit(reservation)}
+                          className="h-9 px-4 bg-blue-50 border-2 border-blue-300 text-blue-700 font-bold hover:bg-blue-600 hover:text-white hover:border-blue-700 hover:scale-110 transition-all shadow-sm flex-1 min-w-[100px]"
+                        >
+                          <span className="w-4 h-4 mr-1.5">{ICONS.EDIT}</span>
+                          Sửa
+                        </Button>
+                      )}
+                      {canCancel(reservation) && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleCancelClick(reservation)}
+                          className="h-9 px-4 bg-error-50 border-2 border-error-300 text-error-700 font-bold hover:bg-error-600 hover:text-white hover:border-error-700 hover:scale-110 transition-all shadow-sm flex-1 min-w-[100px]"
+                        >
+                          <span className="w-4 h-4 mr-1.5">
+                            {ICONS.X_CIRCLE}
+                          </span>
+                          Hủy
+                        </Button>
+                      )}
                     </div>
                   </div>
-
-                  {/* Customer Info */}
-                  <div className="bg-gray-50 rounded-xl p-4 mb-4">
-                    <p className="text-sm font-bold text-gray-600">
-                      Khách hàng
-                    </p>
-                    <p className="text-base font-extrabold text-gray-900 mt-1">
-                      {reservation.customer.customerName}
-                    </p>
-                    <p className="text-xs text-gray-600 mt-1">
-                      {reservation.customer.phoneNumber}
-                    </p>
-                  </div>
-
-                  {/* Room & Dates */}
-                  <div className="space-y-3 mb-4">
-                    <div className="flex items-center gap-2">
-                      <span className="w-5 h-5 text-blue-600">
-                        {ICONS.DOOR_OPEN}
-                      </span>
-                      <span className="text-sm font-semibold text-gray-700">
-                        {firstDetail.roomName} ({firstDetail.roomTypeName})
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="w-5 h-5 text-green-600">
-                        {ICONS.CALENDAR}
-                      </span>
-                      <span className="text-sm font-semibold text-gray-700">
-                        {new Date(firstDetail.checkInDate).toLocaleDateString(
-                          "vi-VN"
-                        )}{" "}
-                        -{" "}
-                        {new Date(firstDetail.checkOutDate).toLocaleDateString(
-                          "vi-VN"
-                        )}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Price */}
-                  <div className="border-t border-gray-200 pt-4 flex items-center justify-between">
-                    <span className="text-xs font-bold text-gray-600 uppercase">
-                      Tổng tiền
-                    </span>
-                    <span className="text-xl font-extrabold bg-linear-to-r from-blue-600 to-blue-700 bg-clip-text text-transparent">
-                      {new Intl.NumberFormat("vi-VN", {
-                        style: "currency",
-                        currency: "VND",
-                        maximumFractionDigits: 0,
-                      }).format(reservation.totalAmount)}
-                    </span>
-                  </div>
-                </div>
-              );
-            })}
+                );
+              })}
           </div>
 
           {reservations.length > 6 && (
             <div className="text-center pt-4">
               <Button
+                onClick={() => setShowAllReservations(!showAllReservations)}
                 variant="outline"
                 className="h-11 px-6 border-2 border-blue-300 text-blue-600 hover:bg-blue-50 font-bold"
               >
-                Xem tất cả {reservations.length} đặt phòng
+                {showAllReservations ? "Ẩn các đặt phòng" : `Xem tất cả`}
               </Button>
             </div>
           )}
         </div>
       )}
-
       {/* Unified Filter with Tabs - Option B */}
       <UnifiedReservationsFilter
         checkInDate={checkInDate}
@@ -421,7 +502,6 @@ export default function ReservationsPage() {
         onReset={handleReset}
         onFindRoomsSearch={handleFindRoomsSearch}
       />
-
       {/* Tabs for View Mode */}
       <Tabs
         value={viewMode}
@@ -560,16 +640,21 @@ export default function ReservationsPage() {
         </TabsContent>
       </Tabs>
 
-      {/* Form Modal */}
-      <ReservationFormModal
-        isOpen={isFormModalOpen}
-        onClose={handleCloseFormModal}
-        onSave={handleSaveReservation}
-        onCancelReservation={handleCancelClick}
-        roomTypes={roomTypes}
-        reservation={selectedReservation || undefined}
-        mode={formMode}
-      />
+      {formMode === "create" ? (
+        <BookingModal isOpen={isFormModalOpen} onClose={handleCloseFormModal} />
+      ) : formMode === "edit" ? (
+        <UpdateBookingModal
+          isOpen={isFormModalOpen}
+          onClose={handleCloseFormModal}
+          reservation={selectedReservation}
+        />
+      ) : (
+        <ViewBookingModal
+          isOpen={isFormModalOpen}
+          onClose={handleCloseFormModal}
+          reservation={selectedReservation}
+        />
+      )}
 
       {/* Cancel Confirmation Modal */}
       <CancelReservationDialog
@@ -578,7 +663,6 @@ export default function ReservationsPage() {
         onConfirm={handleConfirmCancel}
         onCancel={handleCloseCancelModal}
       />
-
       {/* Available Rooms Modal */}
       <AvailableRoomsModal
         isOpen={isAvailableRoomsModalOpen}
@@ -589,7 +673,6 @@ export default function ReservationsPage() {
         checkOutDate={checkOutDate}
         onSelectRoom={handleSelectRoom}
       />
-
       {/* Room Selection Confirmation Modal */}
       <RoomSelectionModal
         isOpen={isRoomSelectionModalOpen}

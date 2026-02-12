@@ -44,7 +44,9 @@ import {
 } from "lucide-react";
 import { EmployeeFormModal } from "@/components/staff/employee-form-modal";
 import { employeeService } from "@/lib/services/employee.service";
+import { PermissionGuard } from "@/components/permission-guard";
 import type { Employee, EmployeeRole, CreateEmployeeRequest, UpdateEmployeeRequest } from "@/lib/types/api";
+import { getEmployeeRole } from "@/lib/utils";
 import { toast } from "sonner";
 
 const roleOptions: { value: EmployeeRole | "ALL"; label: string; color: string }[] = [
@@ -97,23 +99,30 @@ export default function StaffPageNew() {
   const loadEmployees = async () => {
     setLoading(true);
     try {
-      // Load ALL employees (for stats)
+      // Load ALL employees
       const allResponse = await employeeService.getEmployees({
         page: 1,
         limit: 100,
       });
       setAllEmployees(allResponse.data);
 
-      // Load filtered employees (for display)
-      const params: Record<string, number | string> = {
-        page: 1,
-        limit: 100,
-      };
-      if (searchQuery) params.search = searchQuery;
-      if (roleFilter !== "ALL") params.role = roleFilter;
+      // Filter on client side
+      let filtered = allResponse.data;
+      
+      // Apply search filter
+      if (searchQuery) {
+        filtered = filtered.filter((emp) =>
+          emp.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          emp.username.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+      }
 
-      const response = await employeeService.getEmployees(params);
-      setEmployees(response.data);
+      // Apply role filter
+      if (roleFilter !== "ALL") {
+        filtered = filtered.filter((emp) => getEmployeeRole(emp) === roleFilter);
+      }
+
+      setEmployees(filtered);
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : "Vui lòng thử lại sau";
       toast.error("Không thể tải danh sách nhân viên", {
@@ -186,10 +195,10 @@ export default function StaffPageNew() {
   // Statistics - Always use ALL employees (not filtered)
   const stats = {
     total: allEmployees.length,
-    admin: allEmployees.filter((e) => e.role === "ADMIN").length,
-    receptionist: allEmployees.filter((e) => e.role === "RECEPTIONIST").length,
-    housekeeping: allEmployees.filter((e) => e.role === "HOUSEKEEPING").length,
-    staff: allEmployees.filter((e) => e.role === "STAFF").length,
+    admin: allEmployees.filter((e) => getEmployeeRole(e) === "ADMIN").length,
+    receptionist: allEmployees.filter((e) => getEmployeeRole(e) === "RECEPTIONIST").length,
+    housekeeping: allEmployees.filter((e) => getEmployeeRole(e) === "HOUSEKEEPING").length,
+    staff: allEmployees.filter((e) => getEmployeeRole(e) === "STAFF").length,
   };
 
   const hasFilters = searchQuery || roleFilter !== "ALL";
@@ -213,14 +222,16 @@ export default function StaffPageNew() {
               </p>
             </div>
           </div>
-          <Button
-            onClick={handleAddNew}
-            size="lg"
-            className="bg-white text-blue-600 hover:bg-white/90 shadow-2xl hover:shadow-white/20 transition-all duration-300 hover:scale-105 h-14 px-8 font-bold"
-          >
-            <Plus className="mr-2 h-6 w-6" />
-            Thêm nhân viên
-          </Button>
+          <PermissionGuard permission="employee:create">
+            <Button
+              onClick={handleAddNew}
+              size="lg"
+              className="bg-white text-blue-600 hover:bg-white/90 shadow-2xl hover:shadow-white/20 transition-all duration-300 hover:scale-105 h-14 px-8 font-bold"
+            >
+              <Plus className="mr-2 h-6 w-6" />
+              Thêm nhân viên
+            </Button>
+          </PermissionGuard>
         </div>
       </div>
 
@@ -387,17 +398,20 @@ export default function StaffPageNew() {
                 : "Thêm nhân viên đầu tiên để bắt đầu"}
             </p>
             {!hasFilters && (
-              <Button onClick={handleAddNew} className="bg-gradient-to-r from-blue-600 to-cyan-600">
-                <Plus className="mr-2 h-4 w-4" />
-                Thêm nhân viên
-              </Button>
+              <PermissionGuard permission="employee:create">
+                <Button onClick={handleAddNew} className="bg-gradient-to-r from-blue-600 to-cyan-600">
+                  <Plus className="mr-2 h-4 w-4" />
+                  Thêm nhân viên
+                </Button>
+              </PermissionGuard>
             )}
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {employees.map((employee) => {
-              const avatarUrl = getMockAvatar(employee.name, employee.role);
-              const roleOption = roleOptions.find(r => r.value === employee.role);
+              const employeeRole = getEmployeeRole(employee);
+              const avatarUrl = getMockAvatar(employee.name, employeeRole || "STAFF");
+              const roleOption = roleOptions.find(r => r.value === employeeRole);
               
               return (
                 <div
@@ -437,17 +451,21 @@ export default function StaffPageNew() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => handleEdit(employee)}>
-                            <Edit className="mr-2 h-4 w-4" />
-                            Chỉnh sửa
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => handleDeleteClick(employee)}
-                            className="text-red-600"
-                          >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Xóa
-                          </DropdownMenuItem>
+                          <PermissionGuard permission="employee:update">
+                            <DropdownMenuItem onClick={() => handleEdit(employee)}>
+                              <Edit className="mr-2 h-4 w-4" />
+                              Chỉnh sửa
+                            </DropdownMenuItem>
+                          </PermissionGuard>
+                          <PermissionGuard permission="employee:delete">
+                            <DropdownMenuItem
+                              onClick={() => handleDeleteClick(employee)}
+                              className="text-red-600"
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Xóa
+                            </DropdownMenuItem>
+                          </PermissionGuard>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </div>
@@ -456,10 +474,10 @@ export default function StaffPageNew() {
                     <div className="flex items-center justify-center pt-2">
                       <Badge 
                         variant="outline" 
-                        className={`${getRoleBadgeColor(employee.role)} px-4 py-2 text-sm font-bold uppercase tracking-wide`}
+                        className={`${getRoleBadgeColor(employeeRole || "STAFF")} px-4 py-2 text-sm font-bold uppercase tracking-wide`}
                       >
                         <div className={`h-2 w-2 rounded-full ${roleOption?.color} mr-2`} />
-                        {roleOption?.label}
+                        {roleOption?.label || "Không có vai trò"}
                       </Badge>
                     </div>
 

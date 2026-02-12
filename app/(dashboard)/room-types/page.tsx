@@ -12,6 +12,9 @@ import { SearchAndFilterSection } from "@/components/room-types/search-and-filte
 import { PricingEngineTab } from "@/components/room-types/pricing-engine-tab";
 import { useRoomTypes } from "@/hooks/use-room-types";
 import { useMemo } from "react";
+import { PermissionGuard } from "@/components/permission-guard";
+import { useAuth } from "@/hooks/use-auth";
+import { usePermissions } from "@/hooks/use-permissions";
 
 export default function RoomTypesPage() {
   const [activeTab, setActiveTab] = useState("room-types");
@@ -37,6 +40,8 @@ export default function RoomTypesPage() {
     handleFilterByCapacity,
     handleResetFilters,
   } = useRoomTypes();
+
+
 
   const stats = useMemo(() => {
     if (allRoomTypes.length === 0) {
@@ -83,13 +88,15 @@ export default function RoomTypesPage() {
             </p>
           </div>
           {activeTab === "room-types" && (
-            <Button
-              onClick={handleAddNew}
-              className="h-12 px-6 bg-white text-primary-600 hover:bg-gray-50 hover:scale-105 font-bold shadow-xl transition-all text-base"
-            >
-              <span className="w-5 h-5 mr-2">{ICONS.PLUS}</span>
-              Thêm loại phòng mới
-            </Button>
+            <PermissionGuard permission="roomType:create">
+              <Button
+                onClick={handleAddNew}
+                className="h-12 px-6 bg-white text-primary-600 hover:bg-gray-50 hover:scale-105 font-bold shadow-xl transition-all text-base"
+              >
+                <span className="w-5 h-5 mr-2">{ICONS.PLUS}</span>
+                Thêm loại phòng mới
+              </Button>
+            </PermissionGuard>
           )}
         </div>
       </div>

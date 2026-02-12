@@ -11,6 +11,7 @@ import {
 import { employeeService } from "@/lib/services";
 import type { Employee as ApiEmployee } from "@/lib/types/api";
 import { ApiError } from "@/lib/services/api";
+import { getEmployeeRole } from "@/lib/utils";
 
 // Map EmployeeRole to API role format
 function mapRoleToApi(role: EmployeeRole): "ADMIN" | "RECEPTIONIST" | "HOUSEKEEPING" | "STAFF" {
@@ -32,16 +33,18 @@ function mapApiToEmployee(apiEmployee: ApiEmployee): Employee {
     "STAFF": "Phục vụ" as EmployeeRole,
   };
 
+  const apiRole = getEmployeeRole(apiEmployee);
+  
   return {
     employeeId: apiEmployee.id,
     fullName: apiEmployee.name,
     email: "", // Not in API
     phoneNumber: "", // Not in API
-    position: apiEmployee.role,
+    position: apiRole || "STAFF",
     startDate: new Date(), // Not in API
     status: "Đang làm việc",
     hasAccount: true,
-    accountRole: roleMap[apiEmployee.role] || "Phục vụ",
+    accountRole: roleMap[apiRole || "STAFF"] || "Phục vụ",
   };
 }
 
@@ -79,7 +82,7 @@ export function useStaff() {
         name: data.fullName,
         username: data.email.split("@")[0] || `emp_${Date.now()}`, // Generate username from email
         password: "DefaultPassword123", // TODO: Add password field or generate secure password
-        role: "STAFF", // Default role
+        roleId: "", // TODO: Set proper role ID from available roles
       });
 
       const newEmployee = mapApiToEmployee(apiEmployee);
@@ -130,7 +133,7 @@ export function useStaff() {
     try {
       // Update employee role
       const apiEmployee = await employeeService.updateEmployee(employeeId, {
-        role: mapRoleToApi(accountData.role),
+        roleId: mapRoleToApi(accountData.role),
       });
 
       const updatedEmployee = mapApiToEmployee(apiEmployee);

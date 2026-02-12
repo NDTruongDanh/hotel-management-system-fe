@@ -8,6 +8,9 @@ import type {
   ApiResponse,
   PaymentMethod,
   TransactionType,
+  Transaction,
+  GetTransactionsParams,
+  PaginatedResponse,
 } from "@/lib/types/api";
 
 // ============================================================================
@@ -15,13 +18,16 @@ import type {
 // ============================================================================
 
 export interface CreateTransactionRequest {
-  bookingId: string;
+  bookingId?: string;
+  bookingRoomIds?: string[];
+  serviceUsageId?: string;
   paymentMethod: PaymentMethod;
   transactionType: TransactionType;
-  bookingRoomIds?: string[];
+  description?: string;
   promotionApplications?: Array<{
     customerPromotionId: string;
-    bookingRoomId: string;
+    bookingRoomId?: string;
+    serviceUsageId?: string;
   }>;
 }
 
@@ -84,73 +90,125 @@ export const transactionService = {
    * CRITICAL: The backend automatically calculates the amount based on:
    * - DEPOSIT: Minimum 30% of total booking amount
    * - ROOM_CHARGE: Total for specified rooms
-   * - FINAL_PAYMENT: Remaining balance after deposits
+   * - SERVICE_CHARGE: Total for specified services
    *
    * Frontend should NEVER send an amount field.
    */
   async createTransaction(
     data: CreateTransactionRequest
   ): Promise<TransactionResponse> {
-    try {
-      const response = await api.post<ApiResponse<TransactionResponse>>(
-        "/employee/transactions",
-        data,
-        { requiresAuth: true }
-      );
-      const unwrappedData =
-        response && typeof response === "object" && "data" in response
-          ? (response as ApiResponse<TransactionResponse>).data
-          : (response as unknown as TransactionResponse);
-      return unwrappedData;
-    } catch (error) {
-      console.error("Create transaction failed:", error);
-      throw error;
-    }
+    const response = await api.post<ApiResponse<TransactionResponse>>(
+      "/employee/transactions",
+      data,
+      { requiresAuth: true }
+    );
+    const unwrappedData =
+      response && typeof response === "object" && "data" in response
+        ? (response as ApiResponse<TransactionResponse>).data
+        : (response as unknown as TransactionResponse);
+    return unwrappedData;
   },
 
   /**
-   * Get final bill for a booking
-   * GET /employee/bookings/{bookingId}/bill
+   * Get all transactions with pagination and filters
+   * GET /employee/transactions
+   */
+  async getTransactions(
+    params?: GetTransactionsParams
+  ): Promise<PaginatedResponse<Transaction>> {
+    const queryParams = new URLSearchParams();
+    if (params?.bookingId) queryParams.append("bookingId", params.bookingId);
+    if (params?.type) queryParams.append("type", params.type);
+    if (params?.status) queryParams.append("status", params.status);
+    if (params?.page) queryParams.append("page", params.page.toString());
+    if (params?.limit) queryParams.append("limit", params.limit.toString());
+    if (params?.sortBy) queryParams.append("sortBy", params.sortBy);
+    if (params?.sortOrder) queryParams.append("sortOrder", params.sortOrder);
+
+    const query = queryParams.toString();
+    const url = `/employee/transactions${query ? `?${query}` : ""}`;
+
+    const response = await api.get<PaginatedResponse<Transaction>>(url, {
+      requiresAuth: true,
+    });
+    return response;
+  },
+
+  /**
+   * Get transaction by ID
+   * GET /employee/transactions/{transactionId}
+   */
+  async getTransactionById(transactionId: string): Promise<Transaction> {
+    const response = await api.get<ApiResponse<Transaction>>(
+      `/employee/transactions/${transactionId}`,
+      { requiresAuth: true }
+    );
+    const unwrappedData =
+      response && typeof response === "object" && "data" in response
+        ? (response as ApiResponse<Transaction>).data
+        : (response as unknown as Transaction);
+    return unwrappedData;
+  },
+
+  /**
+   * Get final bill for a booking (MOCK)
+   * GET /employee/bookings/{bookingId}/bill (Endpoint does not exist)
+   *
+   * @deprecated Backend does not support bill calculation yet.
+   * This returns a mock zero-value bill to prevent UI crashes.
    */
   async getBill(bookingId: string): Promise<BillResponse> {
-    try {
-      const response = await api.get<ApiResponse<BillResponse>>(
-        `/employee/bookings/${bookingId}/bill`,
-        { requiresAuth: true }
-      );
-      const data =
-        response && typeof response === "object" && "data" in response
-          ? (response as ApiResponse<BillResponse>).data
-          : (response as unknown as BillResponse);
-      return data;
-    } catch (error) {
-      console.error("Get bill failed:", error);
-      throw error;
-    }
+    console.warn("getBill is a MOCK function. Backend endpoint missing.");
+    // Return safe default structure
+    return {
+      bookingId,
+      customerId: "",
+      customerName: "",
+      checkInDate: new Date().toISOString(),
+      checkOutDate: new Date().toISOString(),
+      nights: 0,
+      roomCharges: 0,
+      serviceCharges: 0,
+      earlyCheckInFee: 0,
+      lateCheckOutFee: 0,
+      subtotal: 0,
+      discounts: 0,
+      totalAmount: 0,
+      paidAmount: 0,
+      remainingBalance: 0,
+      breakdown: [],
+    };
   },
 
   /**
    * Process refund for cancelled booking
-   * POST /employee/transactions/refund
-   *
-   * CRITICAL: The backend automatically calculates refund amount based on:
-   * - Cancellation policy (48+ hours: 100%, 24-48 hours: 50%, <24 hours: 0%)
-   * - Total deposits paid
-   *
-   * Frontend should NEVER send an amount field.
+   * Uses POST /employee/transactions with type=REFUND
    */
   async processRefund(data: RefundRequest): Promise<RefundResponse> {
     try {
-      const response = await api.post<ApiResponse<RefundResponse>>(
-        "/employee/transactions/refund",
-        data,
-        { requiresAuth: true }
-      );
-      const unwrappedData =
-        response && typeof response === "object" && "data" in response
-          ? (response as ApiResponse<RefundResponse>).data
-          : (response as unknown as RefundResponse);
-      return unwrappedData;
+      // Handle ORIGINAL_PAYMENT_METHOD case - default to CASH if specific method not provided
+      // Backend transaction creation requires a concrete PaymentMethod enum
+      const paymentMethod =
+        data.refundMethod === "ORIGINAL_PAYMENT_METHOD" || !data.refundMethod
+          ? "CASH"
+          : data.refundMethod;
+
+      const response = await this.createTransaction({
+        bookingId: data.bookingId,
+        paymentMethod: paymentMethod,
+        transactionType: "REFUND",
+        description: data.notes || "Refund processed",
+      });
+
+      // Map TransactionResponse to RefundResponse
+      return {
+        refundId: response.transactionId,
+        bookingId: response.bookingId,
+        amount: response.amount,
+        refundMethod: response.paymentMethod,
+        status: response.status,
+        processedAt: new Date().toISOString(),
+      };
     } catch (error) {
       console.error("Process refund failed:", error);
       throw error;

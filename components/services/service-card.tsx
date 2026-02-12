@@ -1,10 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
 import {
   Dialog,
   DialogContent,
@@ -13,72 +12,51 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ServiceItem } from "@/lib/types/service";
+import type { Service } from "@/lib/types/api";
 import { ICONS } from "@/src/constants/icons.enum";
 import { formatCurrency } from "@/lib/utils";
-
-// Specific images for each service item - mapped to actual service IDs and names
-const SERVICE_ITEM_IMAGES: Record<string, string> = {
-  // Minibar items
-  "SRV001": "https://images.unsplash.com/photo-1548839140-29a749e1cf4d?w=400&q=80", // Nước suối - water bottle
-  "SRV002": "https://images.unsplash.com/photo-1554866585-cd94860890b7?w=400&q=80", // Coca Cola
-  "SRV003": "https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=400&q=80", // Trà xanh 0 độ
-  "SRV004": "https://images.unsplash.com/photo-1566478989037-eec170784d0b?w=400&q=80", // Snack khoai tây - Lays chips
-  
-  // Giặt ủi items
-  "SRV005": "https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?w=400&q=80", // Áo sơ mi - dress shirt
-  "SRV006": "https://images.unsplash.com/photo-1473966968600-fa801b869a1a?w=400&q=80", // Quần tây - trousers
-  "SRV007": "https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=400&q=80", // Váy/đầm - dress
-  
-  // Spa & Massage items
-  "SRV008": "https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=400&q=80", // Massage toàn thân
-  "SRV009": "https://images.unsplash.com/photo-1519823551278-64ac92734fb1?w=400&q=80", // Massage chân
-  "SRV010": "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=400&q=80", // Chăm sóc da mặt
-  
-  // Ăn uống items
-  "SRV011": "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=400&q=80", // Bữa sáng Á - phở
-  "SRV012": "https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=400&q=80", // Bữa sáng Âu - breakfast
-  "SRV013": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&q=80", // Cơm trưa/tối
-  
-  // Thuê xe items
-  "SRV014": "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=400&q=80", // Đưa đón sân bay
-  "SRV015": "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=400&q=80", // Thuê xe 4 chỗ
-  "SRV016": "https://images.unsplash.com/photo-1464219789935-c2d9d9aba644?w=400&q=80", // Thuê xe 7 chỗ - SUV
-};
-
-// Category icons
-const CATEGORY_ICONS: Record<string, React.ReactNode> = {
-  Minibar: ICONS.WINE,
-  "Giặt ủi": ICONS.SHIRT,
-  "Spa & Massage": ICONS.SPA,
-  "Ăn uống": ICONS.UTENSILS,
-  "Thuê xe": ICONS.CAR,
-  "Phụ thu": ICONS.SURCHARGE,
-  "Phí phạt": ICONS.PENALTY,
-};
+import { imageApi, type ImageResponse } from "@/lib/api/image.api";
 
 interface ServiceCardProps {
-  service: ServiceItem;
-  onEdit: (service: ServiceItem) => void;
-  onDelete: (serviceID: string) => void;
-  onToggleActive?: (serviceID: string, isActive: boolean) => void;
+  service: Service;
+  onEdit: (service: Service) => void;
+  onDelete: (serviceId: string) => void;
 }
 
 export function ServiceCard({
   service,
   onEdit,
   onDelete,
-  onToggleActive,
 }: ServiceCardProps) {
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const [firstImage, setFirstImage] = useState<ImageResponse | null>(null);
+  const [loadingImage, setLoadingImage] = useState(true);
 
-  const categoryName = service.category?.categoryName || "Khác";
-  const imageUrl = SERVICE_ITEM_IMAGES[service.serviceID] || SERVICE_ITEM_IMAGES.DEFAULT || "https://images.unsplash.com/photo-1551632436-cbf8dd35adfa?w=400&q=80";
-  const categoryIcon = CATEGORY_ICONS[categoryName] || ICONS.PACKAGE;
+  // Fetch service images from image API
+  useEffect(() => {
+    const fetchImages = async () => {
+      try {
+        setLoadingImage(true);
+        const images = await imageApi.getServiceImages(service.id);
+        if (images && images.length > 0) {
+          setFirstImage(images[0]);
+        }
+      } catch (err) {
+        console.error("Failed to fetch service images:", err);
+      } finally {
+        setLoadingImage(false);
+      }
+    };
+
+    fetchImages();
+  }, [service.id]);
+
+  // Get image URL from fetched image or service object
+  const imageUrl = firstImage?.secureUrl || firstImage?.url || null;
 
   const handleDeleteConfirm = () => {
-    onDelete(service.serviceID);
+    onDelete(service.id);
     setDeleteConfirm(false);
   };
 
@@ -87,10 +65,10 @@ export function ServiceCard({
       <div className="group relative bg-white rounded-2xl shadow-md border-2 border-gray-200 overflow-hidden hover:shadow-xl hover:border-blue-300 hover:-translate-y-1 transition-all duration-300">
         {/* Image Header */}
         <div className="relative h-40 overflow-hidden">
-          {!imageError ? (
+          {!loadingImage && imageUrl && !imageError ? (
             <Image
               src={imageUrl}
-              alt={service.serviceName}
+              alt={service.name}
               fill
               className="object-cover group-hover:scale-110 transition-transform duration-500"
               onError={() => setImageError(true)}
@@ -98,25 +76,23 @@ export function ServiceCard({
             />
           ) : (
             <div className="w-full h-full bg-linear-to-br from-blue-50 to-blue-100 flex items-center justify-center">
-              <div className="w-12 h-12 text-blue-300 flex items-center justify-center">{categoryIcon}</div>
+              <div className="w-12 h-12 text-blue-300 flex items-center justify-center">
+                {ICONS.PACKAGE}
+              </div>
             </div>
           )}
           <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent" />
-          
+
           {/* Status badge */}
           <div className="absolute top-3 left-3">
-            <Badge className={service.isActive 
-              ? "bg-linear-to-r from-success-600 to-success-500 text-white text-xs font-bold shadow-lg" 
-              : "bg-linear-to-r from-gray-500 to-gray-400 text-white text-xs font-bold shadow-lg"
-            }>
+            <Badge
+              className={
+                service.isActive
+                  ? "bg-linear-to-r from-success-600 to-success-500 text-white text-xs font-bold shadow-lg"
+                  : "bg-linear-to-r from-gray-500 to-gray-400 text-white text-xs font-bold shadow-lg"
+              }
+            >
               {service.isActive ? "Hoạt động" : "Tạm ngưng"}
-            </Badge>
-          </div>
-
-          {/* Category badge */}
-          <div className="absolute top-3 right-3">
-            <Badge variant="secondary" className="bg-white/95 text-gray-700 text-xs font-bold backdrop-blur-sm shadow-md">
-              {categoryName}
             </Badge>
           </div>
         </div>
@@ -126,19 +102,10 @@ export function ServiceCard({
           <div className="flex items-start justify-between mb-3">
             <div className="flex-1 min-w-0">
               <h3 className="font-bold text-gray-900 truncate text-base group-hover:text-blue-600 transition-colors">
-                {service.serviceName}
+                {service.name}
               </h3>
-              <p className="text-xs text-gray-500 mt-1 font-medium">
-                Mã: {service.serviceID}
-              </p>
             </div>
           </div>
-
-          {service.description && (
-            <p className="text-sm text-gray-600 line-clamp-2 mb-4 leading-relaxed">
-              {service.description}
-            </p>
-          )}
 
           {/* Price and Unit */}
           <div className="flex items-center justify-between mb-4 pb-4 border-b-2 border-gray-100">
@@ -147,16 +114,11 @@ export function ServiceCard({
                 {formatCurrency(service.price)}
               </span>
               {service.unit && (
-                <span className="text-sm text-gray-500 font-medium">/{service.unit}</span>
+                <span className="text-sm text-gray-500 font-medium">
+                  /{service.unit}
+                </span>
               )}
             </div>
-            {onToggleActive && (
-              <Switch
-                checked={service.isActive}
-                onCheckedChange={(checked) => onToggleActive(service.serviceID, checked)}
-                className="data-[state=checked]:bg-success-500"
-              />
-            )}
           </div>
 
           {/* Actions */}
@@ -167,7 +129,9 @@ export function ServiceCard({
               onClick={() => onEdit(service)}
               className="flex-1 h-10 text-sm font-bold text-blue-600 border-2 border-blue-200 hover:bg-blue-50 hover:border-blue-400 transition-all"
             >
-              <div className="w-4 h-4 mr-1.5 flex items-center justify-center">{ICONS.EDIT}</div>
+              <div className="w-4 h-4 mr-1.5 flex items-center justify-center">
+                {ICONS.EDIT}
+              </div>
               Sửa
             </Button>
             <Button
@@ -176,7 +140,9 @@ export function ServiceCard({
               onClick={() => setDeleteConfirm(true)}
               className="h-10 px-3 font-bold text-error-600 border-2 border-error-200 hover:bg-error-50 hover:border-error-400 transition-all"
             >
-              <div className="w-4 h-4 flex items-center justify-center">{ICONS.TRASH}</div>
+              <div className="w-4 h-4 flex items-center justify-center">
+                {ICONS.TRASH}
+              </div>
             </Button>
           </div>
         </div>
@@ -186,18 +152,25 @@ export function ServiceCard({
       <Dialog open={deleteConfirm} onOpenChange={setDeleteConfirm}>
         <DialogContent className="sm:max-w-[450px]">
           <DialogHeader>
-            <DialogTitle className="text-xl font-bold">Xác nhận xóa dịch vụ</DialogTitle>
+            <DialogTitle className="text-xl font-bold">
+              Xác nhận xóa dịch vụ
+            </DialogTitle>
             <DialogDescription className="text-base">
-              Hành động này không thể hoàn tác. Bạn có chắc muốn xóa dịch vụ này không?
+              Hành động này không thể hoàn tác. Bạn có chắc muốn xóa dịch vụ này
+              không?
             </DialogDescription>
           </DialogHeader>
           <div className="py-4">
             <div className="flex items-center gap-4 p-4 bg-linear-to-br from-gray-50 to-white rounded-xl border-2 border-gray-200">
               <div className="w-14 h-14 rounded-xl bg-linear-to-br from-blue-100 to-blue-50 flex items-center justify-center shrink-0 shadow-sm">
-                <div className="w-7 h-7 text-blue-500 flex items-center justify-center">{categoryIcon}</div>
+                <div className="w-7 h-7 text-blue-500 flex items-center justify-center">
+                  {ICONS.PACKAGE}
+                </div>
               </div>
               <div>
-                <p className="font-bold text-gray-900 text-base">{service.serviceName}</p>
+                <p className="font-bold text-gray-900 text-base">
+                  {service.name}
+                </p>
                 <p className="text-sm font-bold bg-linear-to-r from-blue-600 to-blue-500 bg-clip-text text-transparent">
                   {formatCurrency(service.price)}
                 </p>
@@ -205,10 +178,18 @@ export function ServiceCard({
             </div>
           </div>
           <DialogFooter className="gap-3">
-            <Button variant="outline" onClick={() => setDeleteConfirm(false)} className="h-11 px-6 border-2 font-bold">
+            <Button
+              variant="outline"
+              onClick={() => setDeleteConfirm(false)}
+              className="h-11 px-6 border-2 font-bold"
+            >
               Hủy
             </Button>
-            <Button variant="destructive" onClick={handleDeleteConfirm} className="h-11 px-6 font-bold shadow-lg">
+            <Button
+              variant="destructive"
+              onClick={handleDeleteConfirm}
+              className="h-11 px-6 font-bold shadow-lg"
+            >
               Xóa dịch vụ
             </Button>
           </DialogFooter>
@@ -217,4 +198,3 @@ export function ServiceCard({
     </>
   );
 }
-

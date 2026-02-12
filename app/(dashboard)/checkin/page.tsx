@@ -1,5 +1,6 @@
 "use client";
 
+import { logger } from "@/lib/utils/logger";
 import { CheckInSearch } from "@/components/checkin-checkout/check-in-search";
 import { CheckInResultsTable } from "@/components/checkin-checkout/check-in-results-table";
 import { ModernCheckInModal } from "@/components/checkin-checkout/modern-check-in-modal";
@@ -10,23 +11,30 @@ import { ICONS } from "@/src/constants/icons.enum";
 import { useCheckIn } from "@/hooks/use-checkin";
 import { useNotification } from "@/hooks/use-notification";
 import type { Booking } from "@/lib/types/api";
+import { useAppDispatch } from "@/lib/redux/hooks";
+import { initCheckIn } from "@/lib/redux/slices/checkin.slice";
 
 export default function CheckInPage() {
   // Custom hooks for business logic
   const checkIn = useCheckIn();
   const notification = useNotification();
+  const dispatch = useAppDispatch();
 
   // Check-in handlers
-  const handleCheckInConfirm = async (
-    data: Parameters<typeof checkIn.handleConfirmCheckIn>[0]
+  // Check-in handlers (moved to modal)
+
+  // Walk-in handler
+  const handleWalkInConfirm = async (
+    data: Parameters<typeof checkIn.handleConfirmWalkIn>[0]
   ) => {
     try {
-      const customerName = await checkIn.handleConfirmCheckIn(data);
+      await checkIn.handleConfirmWalkIn(data);
       notification.showSuccess(
-        `Check-in thành công cho ${customerName || "khách hàng"}!`
+        `Check-in khách vãng lai thành công cho ${data.customerName}!`
       );
-    } catch {
-      notification.showError("Check-in thất bại. Vui lòng thử lại.");
+    } catch (error) {
+      notification.showError("Walk-in check-in thất bại. Vui lòng thử lại.");
+      logger.error("Walk-in error:", error);
     }
   };
 
@@ -95,7 +103,10 @@ export default function CheckInPage() {
         ) : (
           <CheckInResultsTable
             reservations={checkIn.results}
-            onCheckIn={checkIn.handleSelectBooking}
+            onCheckIn={(booking) => {
+              checkIn.handleSelectBooking(booking);
+              dispatch(initCheckIn({ bookingId: booking.id }));
+            }}
           />
         )}
       </div>
@@ -105,16 +116,12 @@ export default function CheckInPage() {
         open={checkIn.showModal}
         onOpenChange={checkIn.setShowModal}
         booking={checkIn.selectedBooking as Booking | null}
-        onConfirm={handleCheckInConfirm}
-        isLoading={checkIn.isLoading}
       />
 
       <WalkInModal
         open={checkIn.showWalkInModal}
         onOpenChange={checkIn.setShowWalkInModal}
-        onConfirm={async () => {
-          notification.showError("Tính năng đang được phát triển!");
-        }}
+        onConfirm={handleWalkInConfirm}
       />
     </div>
   );

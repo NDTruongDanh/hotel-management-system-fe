@@ -1,53 +1,86 @@
 // Folio and Transaction Types
 
-// Transaction types for folio
+// Transaction types for folio - MUST match backend exactly
 export type TransactionType =
-  | "ROOM_CHARGE" // Daily room rate
-  | "SERVICE" // Minibar, laundry, F&B
-  | "PAYMENT" // Cash, card, bank transfer
-  | "SURCHARGE" // Early checkin, late checkout, extra guest
-  | "PENALTY" // Damage, loss
   | "DEPOSIT" // Advance payment
+  | "ROOM_CHARGE" // Room-specific charges
+  | "SERVICE_CHARGE" // Service-specific charges
   | "REFUND" // Money returned to guest
   | "ADJUSTMENT"; // Manual correction
 
 // Transaction type labels
 export const TRANSACTION_TYPE_LABELS: Record<TransactionType, string> = {
-  ROOM_CHARGE: "Tiền phòng",
-  SERVICE: "Dịch vụ",
-  PAYMENT: "Thanh toán",
-  SURCHARGE: "Phụ thu",
-  PENALTY: "Phí phạt",
   DEPOSIT: "Đặt cọc",
+  ROOM_CHARGE: "Tiền phòng",
+  SERVICE_CHARGE: "Tiền dịch vụ",
   REFUND: "Hoàn tiền",
   ADJUSTMENT: "Điều chỉnh",
 };
 
 // Transaction type colors for badges
 export const TRANSACTION_TYPE_COLORS: Record<TransactionType, string> = {
-  ROOM_CHARGE: "bg-blue-100 text-blue-800",
-  SERVICE: "bg-green-100 text-green-800",
-  PAYMENT: "bg-purple-100 text-purple-800",
-  SURCHARGE: "bg-amber-100 text-amber-800",
-  PENALTY: "bg-red-100 text-red-800",
   DEPOSIT: "bg-indigo-100 text-indigo-800",
+  ROOM_CHARGE: "bg-blue-100 text-blue-800",
+  SERVICE_CHARGE: "bg-green-100 text-green-800",
   REFUND: "bg-pink-100 text-pink-800",
   ADJUSTMENT: "bg-gray-100 text-gray-800",
 };
 
+export type TransactionStatus = "PENDING" | "COMPLETED" | "FAILED" | "REFUNDED";
+
+export type PaymentMethod =
+  | "CASH"
+  | "CREDIT_CARD"
+  | "BANK_TRANSFER"
+  | "E_WALLET";
+
+export const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
+  CASH: "Tiền mặt",
+  CREDIT_CARD: "Thẻ tín dụng",
+  BANK_TRANSFER: "Chuyển khoản",
+  E_WALLET: "Ví điện tử",
+};
+
+// Transaction Detail (individual charge allocation)
+export interface TransactionDetail {
+  id: string;
+  transactionId: string | null; // Nullable for guest service payments
+  bookingRoomId: string | null;
+  serviceUsageId: string | null;
+  baseAmount: number;
+  discountAmount: number;
+  amount: number;
+  roomNumber?: string; // For display
+  serviceName?: string; // For display
+}
+
 // Individual transaction
 export interface FolioTransaction {
-  transactionID: string;
-  folioID: string;
-  date: string; // YYYY-MM-DD
-  time: string; // HH:MM:SS
+  // Schema fields
+  id: string; // was transactionID
+  bookingId: string | null; // was folioID?
   type: TransactionType;
-  description: string;
-  debit: number; // Charges (money customer owes)
-  credit: number; // Payments (money customer paid)
-  createdBy: string; // Employee name
-  createdAt: string; // Full timestamp
-  isVoided?: boolean; // True if transaction was cancelled
+  baseAmount: number;
+  discountAmount: number;
+  amount: number;
+  method?: PaymentMethod | null;
+  status: TransactionStatus;
+
+  processedById: string | null;
+  occurredAt: string;
+  createdAt: string;
+
+  // Relations
+  details?: TransactionDetail[];
+
+  // Legacy / UI
+  transactionID?: string;
+  folioID?: string;
+  date?: string; // Derived from occurredAt
+  time?: string; // Derived from occurredAt
+  description: string; // Matches Schema
+  createdBy?: string; // from processedBy
+  isVoided?: boolean;
   voidedBy?: string;
   voidedAt?: string;
 }
@@ -93,9 +126,9 @@ export interface PostPaymentFormData {
   mode?: "PAYMENT" | "DEPOSIT"; // Payment mode
 }
 
-// Payment method labels
-export const PAYMENT_METHOD_LABELS: Record<string, string> = {
-  CASH: "Tiền mặt",
-  CARD: "Thẻ tín dụng/ghi nợ",
-  TRANSFER: "Chuyển khoản",
-};
+// Payment method labels (Moved up)
+// export const PAYMENT_METHOD_LABELS: Record<string, string> = {
+//   CASH: "Tiền mặt",
+//   CARD: "Thẻ tín dụng/ghi nợ",
+//   TRANSFER: "Chuyển khoản",
+// };

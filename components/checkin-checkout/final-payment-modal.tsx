@@ -1,5 +1,6 @@
 "use client";
 
+import { logger } from "@/lib/utils/logger";
 import { useState, useEffect } from "react";
 import {
   Dialog,
@@ -25,6 +26,7 @@ import { ICONS } from "@/src/constants/icons.enum";
 import { transactionService } from "@/lib/services";
 import type { PaymentMethod } from "@/lib/types/api";
 import type { BillResponse } from "@/lib/services/transaction.service";
+import { useAuth } from "@/hooks/use-auth";
 
 interface FinalPaymentModalProps {
   isOpen: boolean;
@@ -50,6 +52,7 @@ export function FinalPaymentModal({
   bookingId,
   bookingCode,
 }: FinalPaymentModalProps) {
+  const { user } = useAuth();
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("CASH");
   const [isConfirmed, setIsConfirmed] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -67,7 +70,7 @@ export function FinalPaymentModal({
         const billData = await transactionService.getBill(bookingId);
         setBill(billData);
       } catch (err) {
-        console.error("Failed to load bill:", err);
+        logger.error("Failed to load bill:", err);
         setError(
           err instanceof Error
             ? err.message
@@ -110,7 +113,7 @@ export function FinalPaymentModal({
         transactionType: "ROOM_CHARGE", // or FINAL_PAYMENT based on backend
       });
 
-      console.log("Final payment confirmed:", response);
+      logger.log("Final payment confirmed:", response);
 
       // Success - close modal and notify parent
       onSuccess();
@@ -120,7 +123,7 @@ export function FinalPaymentModal({
       setIsConfirmed(false);
       setPaymentMethod("CASH");
     } catch (err) {
-      console.error("Payment confirmation failed:", err);
+      logger.error("Payment confirmation failed:", err);
       setError(
         err instanceof Error
           ? err.message

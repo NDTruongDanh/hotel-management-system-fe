@@ -21,12 +21,10 @@ import {
 } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ICONS } from "@/src/constants/icons.enum";
-import type { RoomRequest } from "@/lib/types/api";
-import { mockRoomTypes } from "@/lib/mock-room-types";
 import type { RoomType } from "@/lib/types/room";
 
 export interface BookingFormData {
-  rooms: RoomRequest[];
+  rooms: Array<{ roomId: string }>;
   checkInDate: string;
   checkOutDate: string;
   totalGuests: number;
@@ -91,11 +89,13 @@ export function BookingFormModal({
       return;
     }
 
-    const roomType = mockRoomTypes.find((rt: RoomType) => rt.roomTypeID === selectedRoomType);
-    if (!roomType) {
-      console.error("Room type not found:", selectedRoomType, "Available:", mockRoomTypes);
-      return;
-    }
+    // TODO: Fetch room types from API
+    // For now, skip room type validation
+    // const roomType = mockRoomTypes.find((rt: RoomType) => rt.roomTypeID === selectedRoomType);
+    // if (!roomType) {
+    //   console.error("Room type not found:", selectedRoomType, "Available:", mockRoomTypes);
+    //   return;
+    // }
 
     // Check if room type already added
     const existingIndex = roomSelections.findIndex((r) => r.roomTypeId === selectedRoomType);
@@ -113,9 +113,9 @@ export function BookingFormModal({
         ...roomSelections,
         {
           roomTypeId: selectedRoomType,
-          roomTypeName: roomType.roomTypeName,
+          roomTypeName: selectedRoomType, // TODO: Get from API
           count,
-          price: roomType.price,
+          price: 0, // TODO: Get from API
         },
       ]);
     }
@@ -165,17 +165,15 @@ export function BookingFormModal({
   const handleSubmit = async () => {
     if (!validateForm()) return;
 
-    const data: BookingFormData = {
-      rooms: roomSelections.map((r) => ({
-        roomTypeId: r.roomTypeId,
-        count: r.count,
-      })),
-      checkInDate,
-      checkOutDate,
-      totalGuests: parseInt(totalGuests),
-    };
-
-    await onSubmit(data);
+    // NOTE: This component is deprecated. Use ReservationFormModal instead.
+    // This is kept for backward compatibility but won't work properly
+    // because the old booking format (roomTypeId + count) is no longer supported.
+    // Backend now requires specific roomIds.
+    
+    throw new Error(
+      'BookingFormModal is deprecated. Use ReservationFormModal instead. ' +
+      'Backend requires specific room IDs, not room types.'
+    );
   };
 
   const calculateTotal = (): number => {
@@ -273,7 +271,8 @@ export function BookingFormModal({
                     <SelectValue placeholder="Chọn loại phòng" />
                   </SelectTrigger>
                   <SelectContent className="w-full">
-                    {mockRoomTypes.map((rt: RoomType) => (
+                    {/* TODO: Fetch roomTypes from API */}
+                    {[].map((rt: RoomType) => (
                       <SelectItem key={rt.roomTypeID} value={rt.roomTypeID}>
                         <span className="flex items-center gap-2">
                           {rt.roomTypeName} - {formatCurrency(rt.price)}/đêm (Tối đa {rt.capacity} khách)
